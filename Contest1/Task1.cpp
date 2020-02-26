@@ -5,24 +5,14 @@
 void bfs(std::vector<std::vector<int>> &graph, int n, int start, std::vector<int> &distance);
 int findMin(const std::vector<int>& disLeon, const std::vector<int>& disMatilda, const std::vector<int>& disMilk, int n);
 
+void read(std::vector<std::vector<int>> &graph, int &n, int &m, int &leon, int &matilda, int &milk);
+
 const int fMAX = 10e6;
 
 int main() {
 	int n, m;
 	int leon, matilda, milk;
-	std::cin >> n >> m >> leon >> matilda >> milk;
-	leon--;
-	matilda--;
-	milk--;
-	std::vector<std::vector<int>> graph(n);
-	for (int i = 0; i < m; ++i) {
-		int first, second;
-		std::cin >> first >> second;
-		first--;
-		second--;
-		graph[first].push_back(second);
-		graph[second].push_back(first);
-	}
+	std::vector<std::vector<int>> graph;
 	std::vector<int> disLeon(n), disMatilda(n), disMilk(n); // each holds distances for Leon, Matilda and Milk from i vertex
 	for (int i = 0; i <  n; ++i) { // filling distances with 0
 		disLeon[i] = fMAX;
@@ -35,7 +25,23 @@ int main() {
 	std::cout << findMin(disLeon, disMatilda, disMilk, n) << std::endl;
 }
 
-void bfs(std::vector<std::vector<int>> &graph, int n, int start, std::vector<int> &distance) {
+void read(std::vector<std::vector<int>> &graph, int &n, int &m, int &leon, int &matilda, int &milk) {
+	std::cin >> n >> m >> leon >> matilda >> milk;
+	leon--;
+	matilda--;
+	milk--;
+	graph = std::vector<std::vector<int>>(n);
+	for (int i = 0; i < m; ++i) {
+		int first, second;
+		std::cin >> first >> second;
+		first--;
+		second--;
+		graph[first].push_back(second);
+		graph[second].push_back(first);
+	}
+}
+
+void bfs(std::vector<std::vector<int>> &graph, int start, std::vector<int> &distance) {
 	std::deque<int> goingNext;
 	goingNext.push_back(start);
 	distance[start] = 0;
