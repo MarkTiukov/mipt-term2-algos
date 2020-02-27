@@ -2,10 +2,12 @@
 #include <vector>
 #include <deque>
 
-void bfs(std::vector<std::vector<int>> &graph, int n, int start, std::vector<int> &distance);
+void bfs(std::vector<std::vector<int>> &graph, int start, std::vector<int> &distance);
 int findMin(const std::vector<int>& disLeon, const std::vector<int>& disMatilda, const std::vector<int>& disMilk, int n);
 
 void read(std::vector<std::vector<int>> &graph, int &n, int &m, int &leon, int &matilda, int &milk);
+int solve(std::vector<std::vector<int>> &graph, const int& leon, const int& matilda, const int& milk);
+void write(int result);
 
 const int fMAX = 10e6;
 
@@ -13,16 +15,8 @@ int main() {
 	int n, m;
 	int leon, matilda, milk;
 	std::vector<std::vector<int>> graph;
-	std::vector<int> disLeon(n), disMatilda(n), disMilk(n); // each holds distances for Leon, Matilda and Milk from i vertex
-	for (int i = 0; i <  n; ++i) { // filling distances with 0
-		disLeon[i] = fMAX;
-		disMatilda[i] = fMAX;
-		disMilk[i] = fMAX;
-	}
-	bfs(graph, n, leon, disLeon); // counting distances for Leon
-	bfs(graph, n, matilda, disMatilda); // counting distances for Matilda
-	bfs(graph, n, milk, disMilk); // counting distances for Milk
-	std::cout << findMin(disLeon, disMatilda, disMilk, n) << std::endl;
+	int result = solve(graph, leon, matilda, milk);
+	write(result);
 }
 
 void read(std::vector<std::vector<int>> &graph, int &n, int &m, int &leon, int &matilda, int &milk) {
@@ -39,6 +33,24 @@ void read(std::vector<std::vector<int>> &graph, int &n, int &m, int &leon, int &
 		graph[first].push_back(second);
 		graph[second].push_back(first);
 	}
+}
+
+int solve(std::vector<std::vector<int>> &graph, const int& leon, const int& matilda, const int& milk) {
+	int n = graph.size();
+	std::vector<int> disLeon(n), disMatilda(n), disMilk(n); // each holds distances for Leon, Matilda and Milk from i vertex
+	for (int i = 0; i <  n; ++i) { // filling distances with 0
+		disLeon[i] = fMAX;
+		disMatilda[i] = fMAX;
+		disMilk[i] = fMAX;
+	}
+	bfs(graph, leon, disLeon); // counting distances for Leon
+	bfs(graph, matilda, disMatilda); // counting distances for Matilda
+	bfs(graph, milk, disMilk); // counting distances for Milk
+	return findMin(disLeon, disMatilda, disMilk, n);
+}
+
+void write(const int& result) {
+	std::cout << result << std::endl;
 }
 
 void bfs(std::vector<std::vector<int>> &graph, int start, std::vector<int> &distance) {
