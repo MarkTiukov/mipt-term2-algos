@@ -7,7 +7,7 @@ int findMin(const std::vector<int>& disLeon, const std::vector<int>& disMatilda,
 
 void read(std::vector<std::vector<int>> &graph, int &n, int &m, int &leon, int &matilda, int &milk);
 int solve(std::vector<std::vector<int>> &graph, const int& leon, const int& matilda, const int& milk);
-void write(int result);
+void write(const int& result);
 
 const int fMAX = 10e6;
 
@@ -15,6 +15,7 @@ int main() {
 	int n, m;
 	int leon, matilda, milk;
 	std::vector<std::vector<int>> graph;
+	read(graph, n, m, leon, matilda, milk);
 	int result = solve(graph, leon, matilda, milk);
 	write(result);
 }
