@@ -4,17 +4,15 @@
 bool checkForCycles(std::vector<std::vector<int>> &graph, int n);
 bool checkForCycles(std::vector<std::vector<int>> &graph, int n, int vertex, std::vector<int> &colors);
 
+void read(int &n, int &m, std::vector<std::vector<int>> &graph);
+void solve();
+
 std::vector<int>  answer;
 
 int main() {
 	int n, m;
-	std::cin >> n >> m;
-	std::vector<std::vector<int>> graph(n);
-	for (int i = 0; i < m; ++i) {
-		int from, to;
-		std::cin >> from >> to;
-		graph[from].push_back(to);
-	}
+	std::vector<std::vector<int>> graph;
+	read(n, m, graph);
 	if (!checkForCycles(graph, n)) {
 		std::cout << "YES" << std::endl;
 		for (int i = 0; i < n; ++i) {
@@ -23,6 +21,16 @@ int main() {
 		std::cout << std::endl;
 	} else {
 		std::cout << "NO" << std::endl;
+	}
+}
+
+void read(int &n, int &m, std::vector<std::vector<int>> &graph) {
+	std::cin >> n >> m;
+	graph = std::vector<std::vector<int>>(n);
+	for (int i = 0; i < m; ++i) {
+		int from, to;
+		std::cin >> from >> to;
+		graph[from].push_back(to);
 	}
 }
 
