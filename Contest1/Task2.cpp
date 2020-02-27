@@ -1,11 +1,11 @@
 #include <iostream>
 #include <vector>
 
-bool checkForCycles(std::vector<std::vector<int>> &graph, int n);
-bool checkForCycles(std::vector<std::vector<int>> &graph, int n, int vertex, std::vector<int> &colors);
+bool checkForCycles(std::vector<std::vector<int>> &graph);
+bool checkForCycles(std::vector<std::vector<int>> &graph, int vertex, std::vector<int> &colors);
 
 void read(int &n, int &m, std::vector<std::vector<int>> &graph);
-void solve();
+void solve(std::vector<std::vector<int>> &graph);
 
 std::vector<int>  answer;
 
@@ -13,15 +13,7 @@ int main() {
 	int n, m;
 	std::vector<std::vector<int>> graph;
 	read(n, m, graph);
-	if (!checkForCycles(graph, n)) {
-		std::cout << "YES" << std::endl;
-		for (int i = 0; i < n; ++i) {
-			std::cout << answer[n - i - 1] << " ";
-		}
-		std::cout << std::endl;
-	} else {
-		std::cout << "NO" << std::endl;
-	}
+	solve(graph);
 }
 
 void read(int &n, int &m, std::vector<std::vector<int>> &graph) {
@@ -34,7 +26,20 @@ void read(int &n, int &m, std::vector<std::vector<int>> &graph) {
 	}
 }
 
-bool checkForCycles(std::vector<std::vector<int>> &graph, int n) {
+void solve(std::vector<std::vector<int>> &graph) {
+	if (!checkForCycles(graph)) {
+		std::cout << "YES" << std::endl;
+		for (int i = 0; i < graph.size(); ++i) {
+			std::cout << answer[graph.size() - i - 1] << " ";
+		}
+		std::cout << std::endl;
+	} else {
+		std::cout << "NO" << std::endl;
+	}
+}
+
+bool checkForCycles(std::vector<std::vector<int>> &graph) {
+	int n = graph.size();
 	std::vector<int> colors(n); // 0 for "white"; 1 for "gray"; 2 for "black"
 	for (int i = 0; i < n; ++i) {
 		colors[i] = 0;
@@ -42,13 +47,13 @@ bool checkForCycles(std::vector<std::vector<int>> &graph, int n) {
 	bool result = false;
 	for (int i = 0; !result && i < n; ++i) {
 		if (colors[i] ==  0) {
-			result = checkForCycles(graph, n, i, colors);
+			result = checkForCycles(graph, i, colors);
 		}
 	}
 	return result;
 }
 
-bool checkForCycles(std::vector<std::vector<int>> &graph, int n, int vertex, std::vector<int> &colors) {
+bool checkForCycles(std::vector<std::vector<int>> &graph, int vertex, std::vector<int> &colors) {
 	colors[vertex] = 1;
 	bool result = false;
 	for (int i = 0; !result && i < graph[vertex].size(); ++i) {
@@ -58,7 +63,7 @@ bool checkForCycles(std::vector<std::vector<int>> &graph, int n, int vertex, std
 			break;
 		}
 		if (colors[currentV] == 0)
-			result = checkForCycles(graph, n, currentV, colors);
+			result = checkForCycles(graph, currentV, colors);
 	}
 	colors[vertex] = 2;
 	answer.push_back(vertex);
