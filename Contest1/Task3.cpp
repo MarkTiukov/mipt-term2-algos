@@ -1,35 +1,41 @@
-#include s<iostream>
+#include <iostream>
 #include <vector>
 
-struct Graph {
-	std::vector<std::vector<int>> graph;
-	int numberOfVertices = 0;
+void findSCC(std::vector<std::vector<int>> &graph); // finds strongly connected components
+void dfs(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<int> &vertices);
 
-	Graph(int n) {
-		this->numberOfVertices = n;
-		graph = std::vector<std::vector<int>>(n);
-	}
-
-	void add(int from, int to) {
-		this->graph[from].push_back(to);
-	}
-
-};
-
-void findSCC(std::vector<std::vector<int>> &graph, int n); // find strongly connected components
 
 int main() {
 	int n, m;
 	std::cin >> n >> m;
-	Graph graph = Graph(n);
+	std::vector<std::vector<int>> graph = std::vector<std::vector<int>>(n);
 	for (int i = 0; i < m; ++i) {
 		int from, to;
 		std::cin >> from >> to;
-		graph.add(from, to);
+		graph[--from].push_back(--to);
 	}
-	
+	findSCC(graph);
 }
 
-void findSCC(std::vector<std::vector<int>> &graph, int n) {
-	
+void findSCC(std::vector<std::vector<int>> &graph) {
+	std::vector<int> outTime = std::vector<int>(graph.size());
+	std::vector<int> vertices; // stores vertices sorted by time of exiting'em
+	std::vector<int> colors(graph.size(), 0); // 0 = white; 1 = gray; 2 = black;
+	int time = 0;
+	for (int i = 0; i < graph.size(); ++i) {
+		if (colors[i] == 0){
+			dfs(graph, i, colors, vertices);
+		}
+	}
+}
+
+void dfs(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<int> &vertices) {
+	colors[current] = 1;
+	for (int i = 0; i < graph[current].size(); ++i) {
+		int currentV = graph[current][i];
+		if (colors[currentV] == 0)
+			 dfs(graph, currentV, colors, vertices);
+	}
+	colors[current] = 2;
+	vertices.push_back(current);
 }
