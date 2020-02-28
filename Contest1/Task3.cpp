@@ -2,8 +2,9 @@
 #include <vector>
 
 void findSCC(std::vector<std::vector<int>> &graph); // finds strongly connected components
-void dfs(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<int> &vertices);
+void dfs1(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<int> &vertices);
 void makeInvertedGraph(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &invertedGraph);
+bool dfs2(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<std::vector<int>> &components, const int &numberOfCurrentCC);
 
 int main() {
 	int n, m;
@@ -24,11 +25,56 @@ void findSCC(std::vector<std::vector<int>> &graph) {
 	int time = 0;
 	for (int i = 0; i < graph.size(); ++i) {
 		if (colors[i] == 0){
-			dfs(graph, i, colors, vertices);
+			dfs1(graph, i, colors, vertices);
 		}
 	}
 	std::vector<std::vector<int>> invertedGraph(graph.size());
 	makeInvertedGraph(graph, invertedGraph);
+	int ccWithOutEdges = 0;
+	int ccWithInEdges = 0;
+	colors = std::vector<int>(graph.size(), 0);
+	std::vector<std::vector<int>> components;
+	int numberOfCurrentCC = 0;
+	for (int i = 0; i < vertices.size(); ++i) {
+		if (dfs2(invertedGraph, i, colors, components, numberOfCurrentCC)) {
+			ccWithInEdges++;
+		}
+		numberOfCurrentCC++;
+	}
+	std::cout << "HERe" << std::endl;
+	for (int i = 0; i < components.size(); ++i) {
+		std::cout << "Component number " << i << ": ";
+		for (int j = 0; j < components[i].size(); ++j) {
+			std::cout << components[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+}
+
+bool dfs2(std::vector<std::vector<int>> &graph,
+				 int current,
+				 std::vector<int> &colors,
+				 std::vector<std::vector<int>> &components,
+				 const int &numberOfCurrentCC) {
+	bool resultForCurrent = false; // if true then this vertice has an in-edge
+	colors[current] = 1;
+	for (int i = 0; i < graph[current].size(); ++i) {
+		int currentV = graph[current][i];
+		if (colors[currentV] == 0)
+			resultForCurrent = resultForCurrent || dfs2(graph, currentV, colors, components, numberOfCurrentCC);
+		else {
+			if (colors[currentV] == 2)
+				resultForCurrent = true;
+		}
+	}
+	colors[current] = 2;
+	if (numberOfCurrentCC >= components.size()) {
+		std::vector<int> toAdd;
+		toAdd.push_back(current);
+		components.push_back(toAdd);
+	} else
+		components[numberOfCurrentCC].push_back(current);
+	return resultForCurrent;
 }
 
 void makeInvertedGraph(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &invertedGraph) {
@@ -39,12 +85,12 @@ void makeInvertedGraph(std::vector<std::vector<int>> &graph, std::vector<std::ve
 	}
 }
 
-void dfs(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<int> &vertices) {
+void dfs1(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<int> &vertices) {
 	colors[current] = 1;
 	for (int i = 0; i < graph[current].size(); ++i) {
 		int currentV = graph[current][i];
 		if (colors[currentV] == 0)
-			 dfs(graph, currentV, colors, vertices);
+			 dfs1(graph, currentV, colors, vertices);
 	}
 	colors[current] = 2;
 	vertices.push_back(current);
