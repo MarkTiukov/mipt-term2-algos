@@ -3,7 +3,7 @@
 
 void findSCC(std::vector<std::vector<int>> &graph); // finds strongly connected components
 void dfs(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<int> &vertices);
-
+void makeInvertedGraph(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &invertedGraph);
 
 int main() {
 	int n, m;
@@ -27,6 +27,21 @@ void findSCC(std::vector<std::vector<int>> &graph) {
 			dfs(graph, i, colors, vertices);
 		}
 	}
+	std::vector<std::vector<int>> invertedGraph(graph.size());
+	makeInvertedGraph(graph, invertedGraph);
+	for (int i = 0; i < graph.size(); ++i) {
+		for (int j : invertedGraph[i]) {
+			std::cout << i << " ---> " << j << std::endl;
+		}
+	}
+}
+
+void makeInvertedGraph(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &invertedGraph) {
+	for (int i = 0; i < graph.size(); ++i) {
+		for (int j = 0; j < graph[i].size(); ++j) {
+			invertedGraph[graph[i][j]].push_back(i);
+		}
+	}
 }
 
 void dfs(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<int> &vertices) {
@@ -39,3 +54,5 @@ void dfs(std::vector<std::vector<int>> &graph, int current, std::vector<int> &co
 	colors[current] = 2;
 	vertices.push_back(current);
 }
+
+
