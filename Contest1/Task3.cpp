@@ -29,11 +29,6 @@ void findSCC(std::vector<std::vector<int>> &graph) {
 	}
 	std::vector<std::vector<int>> invertedGraph(graph.size());
 	makeInvertedGraph(graph, invertedGraph);
-	for (int i = 0; i < graph.size(); ++i) {
-		for (int j : invertedGraph[i]) {
-			std::cout << i << " ---> " << j << std::endl;
-		}
-	}
 }
 
 void makeInvertedGraph(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &invertedGraph) {
