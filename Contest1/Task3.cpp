@@ -35,13 +35,14 @@ void findSCC(std::vector<std::vector<int>> &graph) {
 	colors = std::vector<int>(graph.size(), 0);
 	std::vector<std::vector<int>> components;
 	int numberOfCurrentCC = 0;
+	for (int i : vertices)
+		std::cout << i << std::endl;
 	for (int i = 0; i < vertices.size(); ++i) {
-		if (dfs2(invertedGraph, i, colors, components, numberOfCurrentCC)) {
+		if (colors[i] == 0 && dfs2(invertedGraph, i, colors, components, numberOfCurrentCC)) {
 			ccWithInEdges++;
 		}
 		numberOfCurrentCC++;
 	}
-	std::cout << "HERe" << std::endl;
 	for (int i = 0; i < components.size(); ++i) {
 		std::cout << "Component number " << i << ": ";
 		for (int j = 0; j < components[i].size(); ++j) {
