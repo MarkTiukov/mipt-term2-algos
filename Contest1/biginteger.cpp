@@ -16,18 +16,23 @@ class BigInteger {
  public:
 
 	BigInteger() {
-		//std::cout << "here2" << std::endl;
 		this->number = std::vector<int>(1, 0);
 	}
 
+	BigInteger(int number) {
+		this->number = std::vector<int>();
+		for (int i = 0; number / 10 > 0; ++i) {
+			this->number.push_back(number % 10);
+			number /= 10;
+		}
+		this->number.push_back(number);
+	}
+
 	std::string toString() const {
-		//std::cout << "HERE" << std::endl;
 		std::string result = "";
-		for (int i : this->number) {
-			//std::cout << "i " << i << "; " << this->number[i] << std::endl;
+		for (int i = this->number.size() - 1; i >= 0; --i) {
 			result += std::to_string(this->number[i]);
 		}
-		//std::cout << result << std::endl;
 		return result;
 	}
 
@@ -47,12 +52,11 @@ BigInteger operator +(const BigInteger& a, const BigInteger& b) {
 }
 
 std::ostream& operator <<(std::ostream& out, const BigInteger& a) {
-	//std::cout << "here" << std::endl;
 	out << a.toString();
 	return out;
 }
 
 int main() {
-	BigInteger big = BigInteger();
-	std::cout << "My biginteger equals -- " <<  big << std::endl;
+	BigInteger big = BigInteger(1234567890);
+	std::cout << big << std::endl;
 }
