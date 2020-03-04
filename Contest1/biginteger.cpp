@@ -3,8 +3,35 @@
 #include <string>
 
 class BigInteger {
+	// TODO operations to realize:
+	//  +
+	//  +=
+	//  -
+	//  -=
+	//  /
+	//  /=
+	//  %
+	//  %=
+	//  унарный минус
+	//  префиксный ++
+	//  постфиксный ++
+	//  префиксный --
+	//  постфиксный --
+	//  <
+	//  <=
+	//  >
+	//  >=
+	//  ==
+	//  !=
+	//  int()
+	//  bool()
+	//  there are more options (литеральный суффикс)
+
+
 	std::vector<int> number;
 	int sign = 0; // "0" --> 0, "1" --> positive, "-1" --> negative
+
+ public:
 
 	int size() const {
 		return this->number.size();
@@ -14,7 +41,9 @@ class BigInteger {
 		return this->number[position];
 	}
 
- public:
+	int getSign() const {
+		return this->sign;
+	}
 
 	BigInteger() {
 		this->number = std::vector<int>(1, 0);
@@ -81,8 +110,13 @@ std::istream& operator >>(std::istream& in, BigInteger& a) {
 	return in;
 }
 
+bool operator <(const BigInteger& a, const BigInteger& b) {
+	if (a.getSign() == b.getSign()) {
+
+	}
+	return a.getSign() < b.getSign() ? true : false;
+}
+
 int main() {
-	BigInteger a;
-	std::cin >> a;
-	std::cout << a << std::endl;
+
 }
