@@ -39,6 +39,17 @@ class BigInteger {
 		this->sign = a.sign;
 	}
 
+	BigInteger(std::string str) {
+		if (str[0] == '-') {
+			this->sign = -1;
+			str = str.substr(1, str.length());
+		}
+		this->number = std::vector<int>(str.length());
+		for (int i = 0; i < str.length(); ++i){
+			this->number[i] = int(str[str.length() - 1 - i]-'0');
+		}
+	}
+
 	std::string toString() const {
 		std::string result = "";
 		result += this->sign  == -1 ? "-" : "";
@@ -68,6 +79,7 @@ std::istream& operator >>(std::istream& in, BigInteger& a) {
 }
 
 int main() {
-	BigInteger a = BigInteger(1241241);
-	BigInteger b = BigInteger(a);
+
+	BigInteger fromStr = BigInteger("0");
+	std::cout << fromStr << std::endl;
 }
