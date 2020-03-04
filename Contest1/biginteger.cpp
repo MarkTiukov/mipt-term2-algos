@@ -75,11 +75,14 @@ std::ostream& operator <<(std::ostream& out, const BigInteger& a) {
 }
 
 std::istream& operator >>(std::istream& in, BigInteger& a) {
-
+	std::string str;
+	in >> str;
+	a = BigInteger(str);
+	return in;
 }
 
 int main() {
-
-	BigInteger fromStr = BigInteger("0");
-	std::cout << fromStr << std::endl;
+	BigInteger a;
+	std::cin >> a;
+	std::cout << a << std::endl;
 }
