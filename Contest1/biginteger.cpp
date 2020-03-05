@@ -144,9 +144,13 @@ bool operator >(const BigInteger& a, const BigInteger& b) {
 	return b < a;
 }
 
+bool operator ==(const BigInteger& a, const BigInteger& b) {
+	return !(a < b) && !(a > b);
+}
+
 int main() {
 	BigInteger a;
 	BigInteger b;
 	std::cin >> a >> b;
-	std::cout << "a < b = " << (a < b ) << std::endl;
+	std::cout << "a == b = " << (a == b ) << std::endl;
 }
