@@ -69,13 +69,21 @@ class BigInteger {
 	}
 
 	BigInteger(std::string str) {
+		this->sign = 1;
 		if (str[0] == '-') {
 			this->sign = -1;
 			str = str.substr(1, str.length());
 		}
-		this->number = std::vector<int>(str.length());
-		for (int i = 0; i < str.length(); ++i){
-			this->number[i] = int(str[str.length() - 1 - i]-'0');
+		if (str == "0") {
+			this->sign = 0;
+			this->number = std::vector<int>(1);
+			this->number.push_back(0);
+		} else {
+			this->number = std::vector<int>(str.length());
+
+			for (int i = 0; i < str.length(); ++i) {
+				this->number[i] = int(str[str.length() - 1 - i] - '0');
+			}
 		}
 	}
 
@@ -111,12 +119,31 @@ std::istream& operator >>(std::istream& in, BigInteger& a) {
 }
 
 bool operator <(const BigInteger& a, const BigInteger& b) {
+	bool result = false; // remains false if a == b
 	if (a.getSign() == b.getSign()) {
-
+		if (a.size() == b.size()) {
+			for (int i = a.size() - 1; i >= 0; --i) {
+				if (a.at(i) == b.at(i))
+					continue;
+				result = a.at(i) < b.at(i);
+				break;
+			}
+		} else {
+			if (a.getSign() > 0) {
+				result = a.size() < b.size() ? true : false; // in case of positive numbers
+			} else {
+				result = a.size() > b.size() ? true : false; // in case of negative numbers
+			}
+		}
+	} else {
+		result = a.getSign() < b.getSign() ? true : false; // in case a >= 0, b < 0 etc
 	}
-	return a.getSign() < b.getSign() ? true : false;
+	return result;
 }
 
 int main() {
-
+	BigInteger a;
+	BigInteger b;
+	std::cin >> a >> b;
+	std::cout << "a < b = " << (a < b ) << std::endl;
 }
