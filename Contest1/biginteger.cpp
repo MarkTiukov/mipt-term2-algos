@@ -148,6 +148,14 @@ bool operator ==(const BigInteger& a, const BigInteger& b) {
 	return !(a < b) && !(a > b);
 }
 
+bool operator <=(const BigInteger& a, const BigInteger& b) {
+	return !(a > b);
+}
+
+bool operator >=(const BigInteger& a, const BigInteger& b) {
+	return !(a < b);
+}
+
 int main() {
 	BigInteger a;
 	BigInteger b;
