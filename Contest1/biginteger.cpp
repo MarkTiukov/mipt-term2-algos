@@ -17,7 +17,6 @@ class BigInteger {
 	//  постфиксный ++
 	//  префиксный --
 	//  постфиксный --
-	//  <
 	//  <=
 	//  >
 	//  >=
@@ -139,6 +138,10 @@ bool operator <(const BigInteger& a, const BigInteger& b) {
 		result = a.getSign() < b.getSign() ? true : false; // in case a >= 0, b < 0 etc
 	}
 	return result;
+}
+
+bool operator >(const BigInteger& a, const BigInteger& b) {
+	return b < a;
 }
 
 int main() {
