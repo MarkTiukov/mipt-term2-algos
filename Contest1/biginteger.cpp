@@ -17,10 +17,6 @@ class BigInteger {
 	//  постфиксный ++
 	//  префиксный --
 	//  постфиксный --
-	//  <=
-	//  >
-	//  >=
-	//  ==
 	//  !=
 	//  int()
 	//  bool()
@@ -154,6 +150,10 @@ bool operator <=(const BigInteger& a, const BigInteger& b) {
 
 bool operator >=(const BigInteger& a, const BigInteger& b) {
 	return !(a < b);
+}
+
+bool operator !=(const BigInteger& a, const BigInteger& b) {
+	return !(a == b);
 }
 
 int main() {
