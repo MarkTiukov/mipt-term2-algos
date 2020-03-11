@@ -17,7 +17,6 @@ class BigInteger {
 	//  постфиксный ++
 	//  префиксный --
 	//  постфиксный --
-	//  bool()
 	//  there are more options (литеральный суффикс)
 
 
