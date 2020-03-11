@@ -17,7 +17,6 @@ class BigInteger {
 	//  постфиксный ++
 	//  префиксный --
 	//  постфиксный --
-	//  int()
 	//  bool()
 	//  there are more options (литеральный суффикс)
 
@@ -94,7 +93,19 @@ class BigInteger {
 
 	}
 
+	explicit operator int() { // prints an error line if current number is not compared to int
+		int result = 0;
+		try {
+			result = std::stoi(this->toString());
+		} catch (...) {
+			std::cout << std::endl << "ERROR: current BigInteger is not compared to int" << std::endl;
+		}
+		return result;
+	}
+
 };
+////////////////////////////////////////////////////////////////////////////////
+
 
 BigInteger operator +(const BigInteger& a, const BigInteger& b) {
 
@@ -160,4 +171,8 @@ int main() {
 	BigInteger b;
 	std::cin >> a >> b;
 	std::cout << "a == b = " << (a == b ) << std::endl;
+
+	std::cout << "////////////////////////" << std::endl;
+	std::cout << int(a) << std::endl;
+	std::cout << int(b) << std::endl;
 }
