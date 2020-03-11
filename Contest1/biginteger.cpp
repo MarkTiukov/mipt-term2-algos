@@ -103,6 +103,12 @@ class BigInteger {
 		return result;
 	}
 
+	explicit operator bool() { // prints an error line if current number is not compared to int
+		if (this->sign == 0)
+			return false;
+		return true;
+	}
+
 };
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -173,6 +179,6 @@ int main() {
 	std::cout << "a == b = " << (a == b ) << std::endl;
 
 	std::cout << "////////////////////////" << std::endl;
-	std::cout << int(a) << std::endl;
-	std::cout << int(b) << std::endl;
+	std::cout << bool(a) << std::endl;
+	std::cout << bool(b) << std::endl;
 }
