@@ -96,5 +96,3 @@ void dfs1(std::vector<std::vector<int>> &graph, int current, std::vector<int> &c
 	colors[current] = 2;
 	vertices.push_back(current);
 }
-
-
