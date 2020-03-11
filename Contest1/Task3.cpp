@@ -1,10 +1,11 @@
 #include <iostream>
 #include <vector>
 
-void findSCC(std::vector<std::vector<int>> &graph); // finds strongly connected components
+void findSCC(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &components); // finds strongly connected components
 void dfs1(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<int> &vertices);
 void makeInvertedGraph(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &invertedGraph);
 void dfs2(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<std::vector<int>> &components, const int &numberOfCurrentCC);
+int countToAdd(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &components);
 
 int main() {
 	int n, m;
@@ -15,10 +16,16 @@ int main() {
 		std::cin >> from >> to;
 		graph[--from].push_back(--to);
 	}
-	findSCC(graph);
+	std::vector<std::vector<int>> components;
+	findSCC(graph, components);
+
 }
 
-void findSCC(std::vector<std::vector<int>> &graph) {
+int countToAdd(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &components) {
+
+}
+
+void findSCC(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &components) {
 	std::vector<int> outTime = std::vector<int>(graph.size());
 	std::vector<int> vertices; // stores vertices sorted by time of exiting'em®
 	std::vector<int> colors(graph.size(), 0); // 0 = white; 1 = gray; 2 = black;
@@ -39,10 +46,7 @@ void findSCC(std::vector<std::vector<int>> &graph) {
 	}
 	std::cout << "/////////////////////////" << std::endl;
 	 */
-	int ccWithOutEdges = 0;
-	int ccWithInEdges = 0;
 	colors = std::vector<int>(graph.size(), 0);
-	std::vector<std::vector<int>> components;
 	int numberOfCurrentCC = 0;
 	// checking vertices
 	/*
