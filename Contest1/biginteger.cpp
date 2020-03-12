@@ -88,10 +88,6 @@ class BigInteger {
 		return result;
 	}
 
-	BigInteger operator +=(const BigInteger& a) {
-
-	}
-
 	explicit operator int() { // prints an error line if current number is not compared to int
 		int result = 0;
 		try {
@@ -106,6 +102,19 @@ class BigInteger {
 		if (this->sign == 0)
 			return false;
 		return true;
+	}
+
+	BigInteger& operator +=(const BigInteger& a) {
+		if (this->sign == 0) {
+			this->number = a.number;
+			this->sign = a.sign;
+			return *this;
+		}
+		if (a.sign == 0)
+			return *this;
+		if (a.sign > 0 && this->sign > 0) {
+	
+		}
 	}
 
 };
