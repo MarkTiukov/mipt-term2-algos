@@ -4,8 +4,10 @@
 void findSCC(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &components); // finds strongly connected components
 void dfs1(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<int> &vertices);
 void makeInvertedGraph(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &invertedGraph);
-void dfs2(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<std::vector<int>> &components, const int &numberOfCurrentCC);
+void dfs2(std::vector<std::vector<int>> &graph, int current, std::vector<int> &colors, std::vector<std::vector<int>> &components, const int &numberOfCurrentCC, bool& result);
 int countToAdd(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &components);
+
+int ccIn = 0;
 
 int main() {
 	int n, m;
@@ -18,7 +20,7 @@ int main() {
 	}
 	std::vector<std::vector<int>> components;
 	findSCC(graph, components);
-
+	std::cout << "ccIn == " << ccIn << std::endl;
 }
 
 int countToAdd(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>> &components) {
@@ -54,8 +56,12 @@ void findSCC(std::vector<std::vector<int>> &graph, std::vector<std::vector<int>>
 	std::cout << i << std::endl;
 	*/
 	for (int i = vertices.size() - 1; i > -1; --i) {
+
 		if (colors[vertices[i]] == 0) {
-			dfs2(invertedGraph, vertices[i], colors, components, numberOfCurrentCC);
+			bool result = false;
+			dfs2(invertedGraph, vertices[i], colors, components, numberOfCurrentCC, result);
+			if (result)
+				ccIn++;
 			numberOfCurrentCC++;
 		}
 	}
@@ -75,12 +81,16 @@ void dfs2(std::vector<std::vector<int>> &graph,
 				 int current,
 				 std::vector<int> &colors,
 				 std::vector<std::vector<int>> &components,
-				 const int &numberOfCurrentCC) {
+				 const int &numberOfCurrentCC, bool& result) {
 	colors[current] = 1;
 	for (int i = 0; i < graph[current].size(); ++i) {
 		int currentV = graph[current][i];
-		if (colors[currentV] == 0)
-			dfs2(graph, currentV, colors, components, numberOfCurrentCC);
+		if (colors[currentV] == 2) {
+			result = true;
+		}
+		if (colors[currentV] == 0) {
+			dfs2(graph, currentV, colors, components, numberOfCurrentCC, result);
+		}
 	}
 	colors[current] = 2;
 	if (numberOfCurrentCC >= components.size()) {
