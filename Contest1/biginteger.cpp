@@ -2,6 +2,9 @@
 #include <vector>
 #include <string>
 
+int myMax(int a, int b);
+int myMin(int a, int b);
+
 class BigInteger {
 	// TODO operations to realize:
 	//  +
@@ -112,9 +115,26 @@ class BigInteger {
 		}
 		if (a.sign == 0)
 			return *this;
-		if (a.sign > 0 && this->sign > 0) {
-	
+		if (a.sign * this->sign > 0) { // both positive or both negative
+			int remainder = 0;
+			// filling with 0 this number
+			for (int i = this->number.size(); i < a.size(); ++i) {
+				this->number.push_back(0);
+			}
+
+			// summing
+			for (int i = 0; i < myMax(this->number.size(), a.size()); ++i) {
+				int toAdd = i < a.size() ? a.number[i] : 0;
+				this->number[i] += toAdd + remainder;
+				remainder = this->number[i] / 10;
+				this->number[i] %= 10;
+			}
+			if (remainder > 0)
+				this->number.push_back(remainder);
+		} else { // one is positive, one is negative
+
 		}
+		return *this;
 	}
 
 };
@@ -180,13 +200,23 @@ bool operator !=(const BigInteger& a, const BigInteger& b) {
 	return !(a == b);
 }
 
+
+
 int main() {
 	BigInteger a;
 	BigInteger b;
 	std::cin >> a >> b;
-	std::cout << "a == b = " << (a == b ) << std::endl;
+	std::cout << "a == " << a << std::endl;
+	std::cout << "b == " << b << std::endl;
 
-	std::cout << "////////////////////////" << std::endl;
-	std::cout << bool(a) << std::endl;
-	std::cout << bool(b) << std::endl;
+	a += b;
+	std::cout << "new a == a + b: " << a << std::endl;
+}
+
+int myMax(int a, int b) {
+	return a > b ? a : b;
+}
+
+int myMin(int a, int b) {
+	return a < b ? a : b;
 }
