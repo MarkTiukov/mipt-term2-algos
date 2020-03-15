@@ -162,12 +162,14 @@ class BigInteger {
 			if (remainder > 0)
 				this->number.push_back(remainder);
 		} else { // one is positive, one is negative
-			if (this->sign > 0) {
+			if (this->sign > 0) { // second is negative
 
 			}
 		}
 		return *this;
 	}
+
+	
 
 };
 ////////////////////////////////////////////////////////////////////////////////
@@ -235,7 +237,7 @@ bool operator !=(const BigInteger& a, const BigInteger& b) {
 
 
 int main() {
-	
+
 }
 
 int myMax(int a, int b) {
