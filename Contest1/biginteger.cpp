@@ -7,16 +7,16 @@ int myMin(int a, int b);
 
 class BigInteger {
 	// TODO operations to realize:
-	//  +
-	//  +=
+	//  + вне
+	//  += внутри
 	//  -
 	//  -=
 	//  /
 	//  /=
 	//  %
 	//  %=
-	//  унарный минус
-	//  префиксный ++
+	//  унарный минус внутри
+	//  префиксный ++ вне
 	//  постфиксный ++
 	//  префиксный --
 	//  постфиксный --
@@ -57,6 +57,36 @@ class BigInteger {
 		}
 		this->number.push_back(number);
 	}
+
+	BigInteger(long long number) {
+		this->number = std::vector<int>();
+		if (number > 0)
+			this->sign = 1;
+		else
+			this->sign = 0 ? number == 0 : -1;
+		number = std::abs(number);
+		for (int i = 0; number / 10 > 0; ++i) {
+			this->number.push_back(number % 10);
+			number /= 10;
+		}
+		this->number.push_back(number);
+	}
+
+	BigInteger(long number) {
+		this->number = std::vector<int>();
+		if (number > 0)
+			this->sign = 1;
+		else
+			this->sign = 0 ? number == 0 : -1;
+		number = std::abs(number);
+		for (int i = 0; number / 10 > 0; ++i) {
+			this->number.push_back(number % 10);
+			number /= 10;
+		}
+		this->number.push_back(number);
+	}
+
+
 
 	BigInteger(const BigInteger &a) {
 		this->number = a.number;
@@ -132,7 +162,9 @@ class BigInteger {
 			if (remainder > 0)
 				this->number.push_back(remainder);
 		} else { // one is positive, one is negative
+			if (this->sign > 0) {
 
+			}
 		}
 		return *this;
 	}
@@ -203,14 +235,7 @@ bool operator !=(const BigInteger& a, const BigInteger& b) {
 
 
 int main() {
-	BigInteger a;
-	BigInteger b;
-	std::cin >> a >> b;
-	std::cout << "a == " << a << std::endl;
-	std::cout << "b == " << b << std::endl;
-
-	a += b;
-	std::cout << "new a == a + b: " << a << std::endl;
+	
 }
 
 int myMax(int a, int b) {
