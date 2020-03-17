@@ -97,8 +97,6 @@ class BigInteger {
 		this->number.push_back(number);
 	}
 
-
-
 	BigInteger(const BigInteger &a) {
 		this->number = a.number;
 		this->sign = a.sign;
@@ -146,6 +144,12 @@ class BigInteger {
 		if (this->sign == 0)
 			return false;
 		return true;
+	}
+
+	BigInteger operator -()  const {
+		BigInteger result = *this;
+		result.sign *= -1;
+		return result;
 	}
 
 	BigInteger& operator +=(const BigInteger& a) {
