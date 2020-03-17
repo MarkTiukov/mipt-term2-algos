@@ -219,6 +219,16 @@ class BigInteger {
 		return copy;
 	}
 
+	BigInteger& operator --() {
+		return *this -= 1;
+	}
+
+	BigInteger operator --(int) {
+		BigInteger copy = *this;
+		*this -= 1;
+		return copy;
+	}
+
 };
 ////////////////////////////////////////////////////////////////////////////////
 
