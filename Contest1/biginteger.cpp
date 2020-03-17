@@ -4,14 +4,12 @@
 
 class BigInteger {
 	// TODO operations to realize:
-	//  + вне
 	//  -
 	//  -=
 	//  /
 	//  /=
 	//  %
 	//  %=
-	//  унарный минус внутри
 	//  префиксный ++ вне
 	//  постфиксный ++
 	//  префиксный --
@@ -208,7 +206,10 @@ class BigInteger {
 		return *this;
 	}
 
-
+	BigInteger& operator -=(const BigInteger& a) {
+		*this += -a;
+		return *this;
+	}
 
 };
 ////////////////////////////////////////////////////////////////////////////////
@@ -282,7 +283,6 @@ int main() {
 
 	std::cout << "a == " << a <<  std::endl;
 	std::cout << "b == " << b << std::endl;
-	BigInteger c = a + b;
-	// a += b;
-	std::cout << "a + b == " << c << std::endl;
+	a -= b;
+	std::cout << "a - b == " << a << std::endl;
 }
