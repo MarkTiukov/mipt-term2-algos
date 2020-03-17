@@ -10,8 +10,6 @@ class BigInteger {
 	//  /=
 	//  %
 	//  %=
-	//  префиксный ++ вне
-	//  постфиксный ++
 	//  префиксный --
 	//  постфиксный --
 	//  there are more options (литеральный суффикс)
@@ -209,6 +207,16 @@ class BigInteger {
 	BigInteger& operator -=(const BigInteger& a) {
 		*this += -a;
 		return *this;
+	}
+
+	BigInteger& operator ++() {
+		return *this += 1;
+	}
+
+	BigInteger operator ++(int) {
+		BigInteger copy = *this;
+		*this += 1;
+		return copy;
 	}
 
 };
