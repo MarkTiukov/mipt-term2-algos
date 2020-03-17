@@ -4,8 +4,8 @@
 
 class BigInteger {
 	// TODO operations to realize:
-	//  -
-	//  -=
+	//  *
+	//  *=
 	//  /
 	//  /=
 	//  %
