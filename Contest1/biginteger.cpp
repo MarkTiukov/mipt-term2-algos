@@ -2,9 +2,6 @@
 #include <vector>
 #include <string>
 
-int myMax(int a, int b);
-int myMin(int a, int b);
-
 class BigInteger {
 	// TODO operations to realize:
 	//  + вне
@@ -25,6 +22,21 @@ class BigInteger {
 
 	std::vector<int> number;
 	int sign = 0; // "0" --> 0, "1" --> positive, "-1" --> negative
+
+	bool absBigger(const BigInteger& a) { // abs(this) > abs(a)
+		bool result = false; // remains false if a == b
+			if (a.size() == this->size()) {
+				for (int i = a.size() - 1; i >= 0; --i) {
+					if (a.at(i) == this->at(i))
+						continue;
+					result = a.at(i) < this->at(i);
+					break;
+				}
+			} else {
+				result = a.size() < this->size() ? true : false;
+			}
+		return result;
+	}
 
  public:
 
@@ -151,9 +163,8 @@ class BigInteger {
 			for (int i = this->number.size(); i < a.size(); ++i) {
 				this->number.push_back(0);
 			}
-
 			// summing
-			for (int i = 0; i < myMax(this->number.size(), a.size()); ++i) {
+			for (int i = 0; i < this->number.size() && i < a.size(); ++i) {
 				int toAdd = i < a.size() ? a.number[i] : 0;
 				this->number[i] += toAdd + remainder;
 				remainder = this->number[i] / 10;
@@ -162,14 +173,38 @@ class BigInteger {
 			if (remainder > 0)
 				this->number.push_back(remainder);
 		} else { // one is positive, one is negative
-			if (this->sign > 0) { // second is negative
-
+			int isBigger = false;
+			if (this->absBigger(a))
+				isBigger = true;
+			int resSign = isBigger ? this->sign : a.sign;
+			int remainder = 0;
+			for (int i = 0; i < this->number.size() || i < a.size(); ++i) {
+				if (i >= this->number.size()) {
+					this->number.push_back(0);
+				}
+				int currentDigit = 0;
+				if (i < a.number.size())
+					currentDigit = a.number[i];
+				if (isBigger) {
+					this->number[i] = this->number[i] - currentDigit + remainder;
+				} else {
+					this->number[i] = currentDigit - this->number[i] + remainder;
+				}
+				if (this->number[i] < 0) {
+					this->number[i] += 10;
+					remainder = -1;
+				}
+				else remainder = 0;
 			}
+			while (this->number.size() > 1 && this->number[this->number.size() - 1] == 0)
+				this->number.pop_back();
+			if (this->number.size() == 1 && this->number[1] == 0)
+				this->sign = 0;
 		}
 		return *this;
 	}
 
-	
+
 
 };
 ////////////////////////////////////////////////////////////////////////////////
@@ -237,13 +272,13 @@ bool operator !=(const BigInteger& a, const BigInteger& b) {
 
 
 int main() {
+	BigInteger a;
+	BigInteger b;
+	std::cin >> a >> b;
 
-}
-
-int myMax(int a, int b) {
-	return a > b ? a : b;
-}
-
-int myMin(int a, int b) {
-	return a < b ? a : b;
+	std::cout << "a == " << a <<  std::endl;
+	std::cout << "b == " << b << std::endl;
+	a += b;
+	std::cout << "a + b == " << a << std::endl;
+	std::cout << "a.sign == " << a.getSign() << std::endl;
 }
