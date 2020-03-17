@@ -5,7 +5,6 @@
 class BigInteger {
 	// TODO operations to realize:
 	//  + вне
-	//  += внутри
 	//  -
 	//  -=
 	//  /
@@ -164,7 +163,7 @@ class BigInteger {
 				this->number.push_back(0);
 			}
 			// summing
-			for (int i = 0; i < this->number.size() && i < a.size(); ++i) {
+			for (int i = 0; i < this->number.size() || i < a.size(); ++i) {
 				int toAdd = i < a.size() ? a.number[i] : 0;
 				this->number[i] += toAdd + remainder;
 				remainder = this->number[i] / 10;
@@ -211,7 +210,9 @@ class BigInteger {
 
 
 BigInteger operator +(const BigInteger& a, const BigInteger& b) {
-
+	BigInteger result(a);
+	result += b;
+	return result;
 }
 
 std::ostream& operator <<(std::ostream& out, const BigInteger& a) {
@@ -269,8 +270,6 @@ bool operator !=(const BigInteger& a, const BigInteger& b) {
 	return !(a == b);
 }
 
-
-
 int main() {
 	BigInteger a;
 	BigInteger b;
@@ -278,7 +277,7 @@ int main() {
 
 	std::cout << "a == " << a <<  std::endl;
 	std::cout << "b == " << b << std::endl;
+	// BigInteger c = a + b;
 	a += b;
 	std::cout << "a + b == " << a << std::endl;
-	std::cout << "a.sign == " << a.getSign() << std::endl;
 }
