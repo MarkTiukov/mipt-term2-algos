@@ -175,7 +175,7 @@ class BigInteger {
 			int isBigger = false;
 			if (this->absBigger(a))
 				isBigger = true;
-			int resSign = isBigger ? this->sign : a.sign;
+			this->sign = isBigger ? this->sign : a.sign;
 			int remainder = 0;
 			for (int i = 0; i < this->number.size() || i < a.size(); ++i) {
 				if (i >= this->number.size()) {
@@ -192,13 +192,14 @@ class BigInteger {
 				if (this->number[i] < 0) {
 					this->number[i] += 10;
 					remainder = -1;
-				}
-				else remainder = 0;
+				} else remainder = 0;
 			}
-			while (this->number.size() > 1 && this->number[this->number.size() - 1] == 0)
+			while (this->number.size() > 1 && this->number[this->number.size() - 1] == 0) {
 				this->number.pop_back();
-			if (this->number.size() == 1 && this->number[1] == 0)
+			}
+			if (this->number.size() == 1 && this->number[0] == 0)
 				this->sign = 0;
+
 		}
 		return *this;
 	}
@@ -277,7 +278,7 @@ int main() {
 
 	std::cout << "a == " << a <<  std::endl;
 	std::cout << "b == " << b << std::endl;
-	// BigInteger c = a + b;
+	//BigInteger c = a + b;
 	a += b;
 	std::cout << "a + b == " << a << std::endl;
 }
