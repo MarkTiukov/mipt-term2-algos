@@ -221,6 +221,12 @@ BigInteger operator +(const BigInteger& a, const BigInteger& b) {
 	return result;
 }
 
+BigInteger operator -(const BigInteger& a, const BigInteger& b) {
+	BigInteger result(a);
+	result -= b;
+	return result;
+}
+
 std::ostream& operator <<(std::ostream& out, const BigInteger& a) {
 	out << a.toString();
 	return out;
