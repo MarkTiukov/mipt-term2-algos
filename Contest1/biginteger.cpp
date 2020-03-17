@@ -278,7 +278,7 @@ int main() {
 
 	std::cout << "a == " << a <<  std::endl;
 	std::cout << "b == " << b << std::endl;
-	//BigInteger c = a + b;
-	a += b;
-	std::cout << "a + b == " << a << std::endl;
+	BigInteger c = a + b;
+	// a += b;
+	std::cout << "a + b == " << c << std::endl;
 }
