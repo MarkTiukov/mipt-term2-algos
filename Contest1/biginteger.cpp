@@ -210,10 +210,7 @@ class BigInteger {
 		return *this;
 	}
 
-	BigInteger& operator *=(const BigInteger& a) {
-		int lengthThis = this->size();
-		
-	}
+	BigInteger& operator *=(const BigInteger& a);
 
 	BigInteger& operator ++() {
 		return *this += 1;
@@ -249,6 +246,10 @@ BigInteger operator -(const BigInteger& a, const BigInteger& b) {
 	BigInteger result(a);
 	result -= b;
 	return result;
+}
+
+BigInteger operator *(const BigInteger& a, const BigInteger& b) {
+
 }
 
 std::ostream& operator <<(std::ostream& out, const BigInteger& a) {
@@ -310,5 +311,53 @@ int main() {
 	BigInteger a, b;
 	std::cin >> a;
 	std::cin >> b;
-	std::cout << (a < b);
+	a *= b;
+	std::cout << a;
+}
+
+BigInteger &BigInteger::operator*=(const BigInteger &a) {
+	int length =  ((a.size() > this->size() ? a.size() : this->size()) + 1) / 2;
+	BigInteger x1;
+	x1.sign = 1;
+	x1.number.clear();
+	BigInteger x2 = BigInteger();
+	x2.sign = 1;
+	x2.number.clear();
+	BigInteger y1 = BigInteger();
+	y1.sign = 1;
+	y1.number.clear();
+	BigInteger y2 = BigInteger();
+	y2.sign = 1;
+	y2.number.clear();
+
+	for (int i = 0; i < 2 * length - this->size() && i < length; ++i){
+		x1.number.push_back(0);
+	}
+	for (int i = 0; i < this->size() - length; ++i) {
+		x1.number.push_back(this->number[i]);
+	}
+
+	for (int i = 0; i < length - this->size(); ++i){
+		x2.number.push_back(0);
+	}
+	for (int i = this->size() - length > 0 ? this->size() - length : 0; i < this->size(); ++i) {
+		x2.number.push_back(this->number[i]);
+	}
+
+	for (int i = 0; i < 2 * length - a.size() && i < length; ++i){
+		y1.number.push_back(0);
+	}
+	for (int i = 0; i < a.size() - length; ++i) {
+		y1.number.push_back(a.number[i]);
+	}
+
+	for (int i = 0; i < length - a.size(); ++i){
+		y2.number.push_back(0);
+	}
+	for (int i = a.size() - length > 0 ? a.size() - length : 0; i < a.size(); ++i) {
+		y2.number.push_back(a.number[i]);
+	}
+	std::cout << x1 << " " << x2 << std::endl;
+	std::cout << y1 << " " << y2 << std::endl;
+
 }
