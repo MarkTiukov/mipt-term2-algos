@@ -107,6 +107,9 @@ class BigInteger {
 			this->number = std::vector<int>(1);
 			this->number.push_back(0);
 		} else {
+			while(str[0] == '0'){
+				str = str.substr(1);
+			}
 			this->number = std::vector<int>(str.length());
 
 			for (int i = 0; i < str.length(); ++i) {
@@ -207,6 +210,11 @@ class BigInteger {
 		return *this;
 	}
 
+	BigInteger& operator *=(const BigInteger& a) {
+		int lengthThis = this->size();
+		
+	}
+
 	BigInteger& operator ++() {
 		return *this += 1;
 	}
@@ -299,12 +307,8 @@ bool operator !=(const BigInteger& a, const BigInteger& b) {
 }
 
 int main() {
-	BigInteger a;
-	BigInteger b;
-	std::cin >> a >> b;
-
-	std::cout << "a == " << a <<  std::endl;
-	std::cout << "b == " << b << std::endl;
-	a -= b;
-	std::cout << "a - b == " << a << std::endl;
+	BigInteger a, b;
+	std::cin >> a;
+	std::cin >> b;
+	std::cout << (a < b);
 }
