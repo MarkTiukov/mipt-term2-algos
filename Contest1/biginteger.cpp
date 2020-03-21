@@ -500,13 +500,12 @@ BigInteger gcd(const BigInteger &a, const BigInteger &b) {
 
 
 class Rational {
- public:
+ private:
 	BigInteger numerator;
 	BigInteger denominator;
 
 	void makeIrreducible();
-
-	std::string _abs_asDecimal(size_t precision = 0) const;
+	Rational reverse() const;
 
  public:
 
@@ -530,6 +529,14 @@ class Rational {
 		this->makeIrreducible();
 	}
 
+	BigInteger getNumerator() const {
+		return this->numerator;
+	}
+
+	BigInteger getDenominator() const {
+		return this->denominator;
+	}
+
 	std::string toString();
 
 	std::string asDecimal(size_t precision = 0) const ;
@@ -539,9 +546,9 @@ class Rational {
 	}
 
 	Rational operator -() const {
-		Rational ans = *this;
-		ans.numerator = -ans.numerator;
-		return ans;
+		Rational result = *this;
+		result.numerator = -result.numerator;
+		return result;
 	}
 
 	Rational& operator +=(const Rational& a) {
@@ -564,7 +571,62 @@ class Rational {
 		return *this;
 	}
 
+	Rational& operator /=(const Rational& a) {
+		*this *= a.reverse();
+		return *this;
+	}
+
 };
+
+Rational operator +(const Rational &a, const Rational &b) {
+	Rational result = a;
+	result += b;
+	return result;
+}
+
+Rational operator -(const Rational& a, const Rational& b) {
+	Rational result = a;
+	result -= b;
+	return result;
+}
+
+Rational operator *(const Rational& a, const Rational& b) {
+	Rational result = a;
+	result *= b;
+	return result;
+}
+
+Rational operator /(const Rational& a, const Rational& b) {
+	Rational result = a;
+	result /= b;
+	return result;
+}
+
+
+bool operator <(const Rational& a, const Rational& b) {
+	return a.getNumerator() * b.getDenominator() < a.getDenominator() * b.getNumerator();
+}
+
+bool operator >(const Rational& a, const Rational& b) {
+	return b < a;
+}
+
+bool operator ==(const Rational& a, const Rational& b) {
+	return !(a < b || a > b);
+}
+
+bool operator <=(const Rational& a, const Rational& b)  {
+	return a < b || a == b;
+}
+
+
+bool operator >=(const Rational& a, const Rational& b) {
+	return b <= a;
+}
+
+bool operator !=(const Rational& a, const Rational& b) {
+	return !(a == b);
+}
 
 void Rational::makeIrreducible() {
 	BigInteger reduce = gcd(this->numerator, this->denominator);
@@ -595,6 +657,14 @@ std::string Rational::asDecimal(size_t precision) const {
 		result += (tmp.numerator / tmp.denominator).toString();
 		tmp -= tmp.numerator / tmp.denominator;
 	}
+	return result;
+}
+
+Rational Rational::reverse() const {
+	Rational result;
+	result.numerator = this->denominator;
+	result.denominator = this->numerator;
+	result.makeIrreducible();
 	return result;
 }
 
