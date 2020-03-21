@@ -5,7 +5,7 @@
 class BigInteger {
 	// TODO operations to realize:
 	//  *
-	//  *=
+	//  *= done
 	//  /
 	//  /=
 	//  %
@@ -259,7 +259,9 @@ BigInteger operator -(const BigInteger& a, const BigInteger& b) {
 }
 
 BigInteger operator *(const BigInteger& a, const BigInteger& b) {
-
+	BigInteger result(a);
+	result *= b;
+	return result;
 }
 
 std::ostream& operator <<(std::ostream& out, const BigInteger& a) {
