@@ -31,6 +31,15 @@ class BigInteger {
 		return result;
 	}
 
+	BigInteger& multiplyOnDegree10(int degree) {
+		std::vector<int> tmp = std::vector<int>(degree, 0);
+		for (int i : this->number){
+			tmp.push_back(i);
+		}
+		this->number = tmp;
+		return *this;
+	}
+
  public:
 
 	int size() const {
@@ -104,8 +113,7 @@ class BigInteger {
 		}
 		if (str == "0") {
 			this->sign = 0;
-			this->number = std::vector<int>(1);
-			this->number.push_back(0);
+			this->number = std::vector<int>(1, 0);
 		} else {
 			while(str[0] == '0'){
 				str = str.substr(1);
@@ -232,6 +240,8 @@ class BigInteger {
 		return copy;
 	}
 
+
+
 };
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -312,10 +322,48 @@ int main() {
 	std::cin >> a;
 	std::cin >> b;
 	a *= b;
-	std::cout << a;
+	std::cout << a << std::endl;
 }
 
-BigInteger &BigInteger::operator*=(const BigInteger &a) {
+BigInteger &BigInteger::operator *=(const BigInteger &a) {
+	this->sign *= a.sign;
+	if (this->sign == 0) {
+		this->number = std::vector<int>(1, 0);
+		return *this;
+	}
+
+	if (a.size() == 1) {
+		int remainder = 0;
+		for (int i = 0; i < this->size(); ++i) {
+			this->number[i] = this->number[i] * a.number[0] + remainder;
+			remainder = this->number[i] / 10;
+			this->number[i] %= 10;
+		}
+		if (remainder > 0)
+			this->number.push_back(remainder);
+		while (this->number.size() > 1 && this->number[this->number.size() - 1] == 0) {
+			this->number.pop_back();
+		}
+		return *this;
+	}
+
+	if (this->size() == 1) {
+		int currentNumber = this->number[0];
+		this->number.clear();
+		int remainder = 0;
+		for (int i = 0; i < a.size(); ++i) {
+			this->number.push_back(a.number[i] * currentNumber + remainder);
+			remainder = this->number[i] / 10;
+			this->number[i] %= 10;
+		}
+		if (remainder > 0)
+			this->number.push_back(remainder);
+		while (this->number.size() > 1 && this->number[this->number.size() - 1] == 0) {
+			this->number.pop_back();
+		}
+		return *this;
+	}
+
 	int length =  ((a.size() > this->size() ? a.size() : this->size()) + 1) / 2;
 	BigInteger x1;
 	x1.sign = 1;
@@ -330,34 +378,50 @@ BigInteger &BigInteger::operator*=(const BigInteger &a) {
 	y2.sign = 1;
 	y2.number.clear();
 
-	for (int i = 0; i < 2 * length - this->size() && i < length; ++i){
-		x1.number.push_back(0);
-	}
-	for (int i = 0; i < this->size() - length; ++i) {
-		x1.number.push_back(this->number[i]);
+	if (this->size() < length) {
+		x1 = BigInteger(0);
+	} else {
+		for (int i = length; i < this->size(); ++i) {
+			x1.number.push_back(this->number[i]);
+		}
 	}
 
-	for (int i = 0; i < length - this->size(); ++i){
-		x2.number.push_back(0);
-	}
-	for (int i = this->size() - length > 0 ? this->size() - length : 0; i < this->size(); ++i) {
+	for (int i = 0; i < this->size() && i < length; ++i) {
 		x2.number.push_back(this->number[i]);
 	}
 
-	for (int i = 0; i < 2 * length - a.size() && i < length; ++i){
-		y1.number.push_back(0);
-	}
-	for (int i = 0; i < a.size() - length; ++i) {
-		y1.number.push_back(a.number[i]);
+	if (a.size() < length) {
+		y1 = BigInteger(0);
+	} else {
+		for (int i = length; i < a.size(); ++i) {
+			y1.number.push_back(a.number[i]);
+		}
 	}
 
-	for (int i = 0; i < length - a.size(); ++i){
-		y2.number.push_back(0);
-	}
-	for (int i = a.size() - length > 0 ? a.size() - length : 0; i < a.size(); ++i) {
+	for (int i = 0; i < a.size() && i < length; ++i) {
 		y2.number.push_back(a.number[i]);
 	}
-	std::cout << x1 << " " << x2 << std::endl;
-	std::cout << y1 << " " << y2 << std::endl;
 
+	// std::cout << "x: " << x1 << " " << x2 << std::endl;
+	// std::cout << "y: " << y1 << " " << y2 << std::endl;
+
+
+	BigInteger x1y1 = x1;
+	x1y1 *= y1;
+	BigInteger x2y2 = x2;
+	x2y2 *= y2;
+	BigInteger sums = x1 + x2;
+	sums *= (y1 + y2);
+
+	this->number.clear();
+
+	BigInteger tmp = (sums - x1y1 - x2y2).multiplyOnDegree10(length);
+	tmp += x2y2;
+	tmp += x1y1.multiplyOnDegree10(length * 2);
+
+	this->number = tmp.number;
+	while (this->number.size() > 1 && this->number[this->number.size() - 1] == 0) {
+		this->number.pop_back();
+	}
+	return *this;
 }
