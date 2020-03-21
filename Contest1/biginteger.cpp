@@ -541,10 +541,6 @@ class Rational {
 
 	std::string asDecimal(size_t precision = 0) const ;
 
-	explicit operator double() const {
-		return std::stold(this->asDecimal(350));
-	}
-
 	Rational operator -() const {
 		Rational result = *this;
 		result.numerator = -result.numerator;
@@ -649,11 +645,10 @@ std::string Rational::asDecimal(size_t precision) const {
 	Rational tmp = *this;
 	tmp.numerator = tmp.numerator.absoluteValue();
 	std::string result = *this < 0 ? "-" : "";
-	result += (tmp.numerator / tmp.denominator).toString();
-	result.push_back('.');
+	result += (tmp.numerator / tmp.denominator).toString() + ".";
 	tmp -= tmp.numerator / tmp.denominator;
 	for (unsigned int i = 0; i < precision; ++i) {
-		tmp *= Rational(10);
+		tmp *= 10;
 		result += (tmp.numerator / tmp.denominator).toString();
 		tmp -= tmp.numerator / tmp.denominator;
 	}
@@ -666,8 +661,4 @@ Rational Rational::reverse() const {
 	result.denominator = this->numerator;
 	result.makeIrreducible();
 	return result;
-}
-
-int main(){
-
 }
