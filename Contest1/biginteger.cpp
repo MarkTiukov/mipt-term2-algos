@@ -96,7 +96,7 @@ class BigInteger {
 			this->number.push_back(number);
 	} */
 
-	BigInteger(const BigInteger &a) {
+	BigInteger(const BigInteger& a) {
 		this->number = a.number;
 		this->sign = a.sign;
 	}
@@ -536,6 +536,32 @@ class Rational {
 
 	explicit operator double() const {
 		return std::stold(this->asDecimal(350));
+	}
+
+	Rational operator -() const {
+		Rational ans = *this;
+		ans.numerator = -ans.numerator;
+		return ans;
+	}
+
+	Rational& operator +=(const Rational& a) {
+		this->numerator *= a.denominator;
+		this->numerator += this->denominator * a.numerator;
+		this->denominator *= a.denominator;
+		this->makeIrreducible();
+		return *this;
+	}
+
+	Rational& operator -=(const Rational& a) {
+		*this += -a;
+		return *this;
+	}
+
+	Rational& operator *=(const Rational& a) {
+		this->numerator *= a.numerator;
+		this->denominator *= a.denominator;
+		this->makeIrreducible();
+		return *this;
 	}
 
 };
