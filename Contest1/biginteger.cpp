@@ -4,30 +4,23 @@
 
 class BigInteger {
 	// TODO operations to realize:
-	//  *
-	//  *= done
-	//  /
-	//  /=
-	//  %
-	//  %=
-	//  there are more options (литеральный суффикс)
-
+	// Rational
 
 	std::vector<int> number;
 	int sign = 0; // "0" --> 0, "1" --> positive, "-1" --> negative
 
 	bool absBigger(const BigInteger& a) { // abs(this) > abs(a)
 		bool result = false; // remains false if a == b
-			if (a.size() == this->size()) {
-				for (int i = a.size() - 1; i >= 0; --i) {
-					if (a.at(i) == this->at(i))
-						continue;
-					result = a.at(i) < this->at(i);
-					break;
-				}
-			} else {
-				result = a.size() < this->size() ? true : false;
+		if (a.size() == this->size()) {
+			for (size_t i = a.size(); i-- > 0;) { //size_t i = a.size() - 1; i >= 0; --i
+				if (a.at(i) == this->at(i))
+					continue;
+				result = a.at(i) < this->at(i);
+				break;
 			}
+		} else {
+			result = a.size() < this->size() ? true : false;
+		}
 		return result;
 	}
 
@@ -42,7 +35,7 @@ class BigInteger {
 
  public:
 
-	int size() const {
+	size_t size() const {
 		return this->number.size();
 	}
 
@@ -63,42 +56,44 @@ class BigInteger {
 		if (number > 0)
 			this->sign = 1;
 		else
-			this->sign = 0 ? number == 0 : -1;
+			this->sign = number == 0 ? 0 : -1;
 		number = std::abs(number);
-		for (int i = 0; number / 10 > 0; ++i) {
+		while(number / 10 > 0) {
 			this->number.push_back(number % 10);
 			number /= 10;
 		}
 		this->number.push_back(number);
 	}
 
-	BigInteger(long long number) {
-		this->number = std::vector<int>();
-		if (number > 0)
-			this->sign = 1;
-		else
-			this->sign = 0 ? number == 0 : -1;
-		number = std::abs(number);
-		for (int i = 0; number / 10 > 0; ++i) {
-			this->number.push_back(number % 10);
-			number /= 10;
-		}
-		this->number.push_back(number);
+	/*
+	 BigInteger(long long number) {
+			this->number = std::vector<int>();
+			if (number > 0)
+					this->sign = 1;
+			else
+					this->sign = 0 ? number == 0 : -1;
+			number = std::abs(number);
+			while (number / 10 > 0) {
+					this->number.push_back(number % 10);
+					number /= 10;
+			}
+			this->number.push_back(number);
 	}
+	*/
 
-	BigInteger(long number) {
-		this->number = std::vector<int>();
-		if (number > 0)
-			this->sign = 1;
-		else
-			this->sign = 0 ? number == 0 : -1;
-		number = std::abs(number);
-		for (int i = 0; number / 10 > 0; ++i) {
-			this->number.push_back(number % 10);
-			number /= 10;
-		}
-		this->number.push_back(number);
-	}
+	/* BigInteger(long number) {
+			this->number = std::vector<int>();
+			if (number > 0)
+					this->sign = 1;
+			else
+					this->sign = 0 ? number == 0 : -1;
+			number = std::abs(number);
+			while (number / 10 > 0) {
+					this->number.push_back(number % 10);
+					number /= 10;
+			}
+			this->number.push_back(number);
+	} */
 
 	BigInteger(const BigInteger &a) {
 		this->number = a.number;
@@ -120,7 +115,7 @@ class BigInteger {
 			}
 			this->number = std::vector<int>(str.length());
 
-			for (int i = 0; i < str.length(); ++i) {
+			for (size_t i = 0; i < str.length(); ++i) {
 				this->number[i] = int(str[str.length() - 1 - i] - '0');
 			}
 		}
@@ -129,7 +124,7 @@ class BigInteger {
 	std::string toString() const {
 		std::string result = "";
 		result += this->sign  == -1 ? "-" : "";
-		for (int i = this->number.size() - 1; i >= 0; --i) {
+		for (size_t i = this->number.size(); i-- > 0;) { //size_t i = this->number.size() - 1; i >= 0; --i
 			result += std::to_string(this->number[i]);
 		}
 		return result;
@@ -168,11 +163,11 @@ class BigInteger {
 		if (a.sign * this->sign > 0) { // both positive or both negative
 			int remainder = 0;
 			// filling with 0 this number
-			for (int i = this->number.size(); i < a.size(); ++i) {
+			for (size_t i = this->number.size(); i < a.size(); ++i) {
 				this->number.push_back(0);
 			}
 			// summing
-			for (int i = 0; i < this->number.size() || i < a.size(); ++i) {
+			for (size_t i = 0; i < this->number.size() || i < a.size(); ++i) {
 				int toAdd = i < a.size() ? a.number[i] : 0;
 				this->number[i] += toAdd + remainder;
 				remainder = this->number[i] / 10;
@@ -181,12 +176,12 @@ class BigInteger {
 			if (remainder > 0)
 				this->number.push_back(remainder);
 		} else { // one is positive, one is negative
-			int isBigger = false;
+			bool isBigger = false;
 			if (this->absBigger(a))
 				isBigger = true;
 			this->sign = isBigger ? this->sign : a.sign;
 			int remainder = 0;
-			for (int i = 0; i < this->number.size() || i < a.size(); ++i) {
+			for (size_t i = 0; i < this->number.size() || i < a.size(); ++i) {
 				if (i >= this->number.size()) {
 					this->number.push_back(0);
 				}
@@ -296,10 +291,12 @@ bool operator <(const BigInteger& a, const BigInteger& b) {
 	bool result = false; // remains false if a == b
 	if (a.getSign() == b.getSign()) {
 		if (a.size() == b.size()) {
-			for (int i = a.size() - 1; i >= 0; --i) {
+			for (size_t i = a.size(); i-- > 0;) { //size_t i = a.size() - 1; i >= 0; --i
 				if (a.at(i) == b.at(i))
 					continue;
 				result = a.at(i) < b.at(i);
+				if (a.getSign() < 0)
+					result = !result;
 				break;
 			}
 		} else {
@@ -335,17 +332,6 @@ bool operator !=(const BigInteger& a, const BigInteger& b) {
 	return !(a == b);
 }
 
-int main() {
-	BigInteger a, b;
-	std::cin >> a;
-	std::cin >> b;
-	int a1 = int(a);
-	int b1 = int(b);
-	a *= a;
-	std::cout << a << std::endl;
-	std::cout << a1 / b1 << std::endl;
-}
-
 BigInteger& BigInteger::operator *=(const BigInteger &a) {
 	this->sign *= a.sign;
 	if (this->sign == 0) {
@@ -355,7 +341,7 @@ BigInteger& BigInteger::operator *=(const BigInteger &a) {
 
 	if (a.size() == 1) {
 		int remainder = 0;
-		for (int i = 0; i < this->size(); ++i) {
+		for (size_t i = 0; i < this->size(); ++i) {
 			this->number[i] = this->number[i] * a.number[0] + remainder;
 			remainder = this->number[i] / 10;
 			this->number[i] %= 10;
@@ -372,7 +358,7 @@ BigInteger& BigInteger::operator *=(const BigInteger &a) {
 		int currentNumber = this->number[0];
 		this->number.clear();
 		int remainder = 0;
-		for (int i = 0; i < a.size(); ++i) {
+		for (size_t i = 0; i < a.size(); ++i) {
 			this->number.push_back(a.number[i] * currentNumber + remainder);
 			remainder = this->number[i] / 10;
 			this->number[i] %= 10;
@@ -385,7 +371,7 @@ BigInteger& BigInteger::operator *=(const BigInteger &a) {
 		return *this;
 	}
 
-	int length =  ((a.size() > this->size() ? a.size() : this->size()) + 1) / 2;
+	size_t length =  ((a.size() > this->size() ? a.size() : this->size()) + 1) / 2;
 	BigInteger x1;
 	x1.sign = 1;
 	x1.number.clear();
@@ -402,24 +388,24 @@ BigInteger& BigInteger::operator *=(const BigInteger &a) {
 	if (this->size() < length) {
 		x1 = BigInteger(0);
 	} else {
-		for (int i = length; i < this->size(); ++i) {
+		for (size_t i = length; i < this->size(); ++i) {
 			x1.number.push_back(this->number[i]);
 		}
 	}
 
-	for (int i = 0; i < this->size() && i < length; ++i) {
+	for (size_t i = 0; i < this->size() && i < length; ++i) {
 		x2.number.push_back(this->number[i]);
 	}
 
 	if (a.size() < length) {
 		y1 = BigInteger(0);
 	} else {
-		for (int i = length; i < a.size(); ++i) {
+		for (size_t i = length; i < a.size(); ++i) {
 			y1.number.push_back(a.number[i]);
 		}
 	}
 
-	for (int i = 0; i < a.size() && i < length; ++i) {
+	for (size_t i = 0; i < a.size() && i < length; ++i) {
 		y2.number.push_back(a.number[i]);
 	}
 
@@ -457,25 +443,25 @@ BigInteger& BigInteger::operator /=(const BigInteger &a) {
 		divisor *= 10;
 	}
 	while (divisor.size() >= a.size()) {
-		int counter = 0;
+		size_t counter = 0;
 		while (divisor <= dividend) {
 			dividend -= divisor;
 			counter++;
 		}
 		answer.number.push_back(counter);
-		for (int i = 0; i < int(divisor.number.size()) - 1; i++) {
+		for (size_t i = 0; i < size_t(divisor.number.size()) - 1; i++) {
 			std::swap(divisor.number[i], divisor.number[i + 1]);
 		}
 		divisor.number.pop_back();
 	}
-	for (int i = 0; i < answer.number.size() / 2; i++) {
+	for (size_t i = 0; i < answer.number.size() / 2; i++) {
 		std::swap(answer.number[i], answer.number[answer.number.size() - 1 - i]);
 	}
 	while (answer.number.size() > 1 && answer.number[answer.number.size() - 1] == 0) {
 		answer.number.pop_back();
 	}
 	answer.sign = (a.sign * this->sign);
-	if (answer == 0)
+	if (answer.size() == 1 && answer.number[0] == 0)
 		answer.sign = 0;
 	*this = answer;
 	return *this;
@@ -485,4 +471,161 @@ BigInteger& BigInteger::operator %=(const BigInteger &a) {
 	BigInteger integerPart = *this / a;
 	*this -= (integerPart * a);
 	return *this;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+
+class Rational {
+ public:
+	BigInteger denominator;
+	BigInteger numerator;
+
+ public:
+
+	Rational() {
+
+	}
+
+	Rational(int value) {
+		this->numerator = BigInteger(value);
+		this->denominator = 1;
+	}
+
+	Rational(const Rational& r) {
+		this->numerator = r.numerator;
+		this->denominator = r.denominator;
+	}
+
+	Rational(const BigInteger& b) {
+		this->numerator = b;
+		this->denominator = 1;
+	}
+
+	std::string asDecimal(int value){
+		if (value == 1)
+			return "1.0";
+		return "1.00";
+	}
+
+	std::string toString() {
+		return "1234567890";
+	}
+
+	Rational& operator +=(const Rational& a) {
+		this->numerator = a.numerator;
+		this->denominator = a.denominator;
+		return *this;
+	}
+
+	Rational& operator -=(const Rational& a) {
+		this->numerator = a.numerator;
+		this->denominator = a.denominator;
+		return *this;
+
+	}
+
+	Rational& operator *=(const Rational& a) {
+		this->numerator = a.numerator;
+		this->denominator = a.denominator;
+		return *this;
+	}
+
+	Rational& operator /=(const Rational& a) {
+		this->numerator = a.numerator;
+		this->denominator = a.denominator;
+		return *this;
+
+	}
+
+	Rational operator -()  const {
+		Rational result = *this;
+		result.numerator *= -1;
+		result.denominator = this->denominator;
+		return result;
+	}
+
+};
+
+Rational operator +(const Rational& r1, const Rational& r2) {
+	Rational result = r1;
+	result.numerator += r2.numerator;
+	return r1;
+}
+
+Rational operator -(const Rational& r1, const Rational& r2) {
+	Rational result = r1;
+	result.numerator -= r2.numerator;
+	return r1;
+}
+
+Rational operator *(const Rational& r1, const Rational& r2) {Rational result = r1;
+	result.numerator *= r2.numerator;
+	return r1;
+}
+
+Rational operator /(const Rational& r1, const Rational& r2) {
+	Rational result = r1;
+	result.numerator /= r2.numerator;
+	return r1;
+}
+bool operator <(const Rational& a, const Rational& b) {
+	return a.numerator < b.numerator;
+}
+
+bool operator >(const Rational& a, const Rational& b) {
+	return b < a;
+}
+
+bool operator ==(const Rational& a, const Rational& b) {
+	return !(a < b) && !(a > b);
+}
+
+bool operator <=(const Rational& a, const Rational& b) {
+	return !(a > b);
+}
+
+bool operator >=(const Rational& a, const Rational& b) {
+	return !(a < b);
+}
+
+bool operator !=(const Rational& a, const Rational& b) {
+	return !(a == b);
+}
+
+int main(){
+	BigInteger a, b, k;
+	b = 0, k = 1234567;
+	std::ostream& oss = std::cout;
+	oss << b << ' ' << k;
+	a = -a;
+	std::string testString = a.toString() + " " + (-k).toString();
+	oss << testString << std::endl;
+	a = 999, b = 1000;
+	a = a += a;
+	testString = a.toString();
+	++a %= a /= a *= a -= b++;
+	oss << 5+a << ' ' << 1-b; // 5 -1000
+	oss << (a = (bool(a) ? -1 : -2));
+	std::cin >> a >> b;
+	oss << b << ' ' << a << ' ';
+	oss << a+b << ' ' << a-b << ' ' << a*b << ' ' << a/b << ' ' << a%b << '\n';
+	std::vector<BigInteger> v;
+	for (int i = 0; i <1000 ; ++i) {
+		v.push_back(1000 - i);
+	}
+	oss << v[0] << ' ' << v[500] << ' ' << v[999] << ' ';
+	oss << (a != b) << ' ' << (a < b) << ' ' << (a > b) << ' ';
+	oss << (a <= b) << ' ' << (a >= b);
+	BigInteger c, d, e, f;
+	std::istream& iss = std::cin;
+	iss >> a >> b;
+	oss << b << a;
+	iss >> c >> d;
+	iss >> e >> f;
+	oss << a+b << ' ' << c+d << ' ' << e+f;
+	oss << a-b << ' ' << c-d << ' ' << e-f;
+	oss << a*b << ' ' << c*d << ' ' << e*f;
+	oss << a/b << ' ' << c/d << ' ' << e/f;
+	oss << a%b << ' ' << c%d << ' ' << e%f;
 }
