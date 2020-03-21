@@ -51,7 +51,8 @@ class BigInteger {
 		this->number = std::vector<int>(1, 0);
 	}
 
-	BigInteger(int number) {
+	BigInteger(const int num) {
+		int number = num;
 		this->number = std::vector<int>();
 		if (number > 0)
 			this->sign = 1;
@@ -100,7 +101,8 @@ class BigInteger {
 		this->sign = a.sign;
 	}
 
-	BigInteger(std::string str) {
+	BigInteger(const std::string line) {
+		std::string str = line;
 		this->sign = 1;
 		if (str[0] == '-') {
 			this->sign = -1;
@@ -239,7 +241,11 @@ class BigInteger {
 		return copy;
 	}
 
-
+	BigInteger absoluteValue() {
+		BigInteger result = *this;
+		result.sign *= result.sign;
+		return result;
+	}
 
 };
 ////////////////////////////////////////////////////////////////////////////////
@@ -474,158 +480,98 @@ BigInteger& BigInteger::operator %=(const BigInteger &a) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
+
+BigInteger gcd(const BigInteger &a, const BigInteger &b) {
+	if (a % b == BigInteger(0))
+		return BigInteger(b);
+	else {
+		BigInteger aCopy = a;
+		BigInteger bCopy = b;
+		while (bCopy != BigInteger(0)) {
+			aCopy %= bCopy;
+			std::swap(aCopy, bCopy);
+		}
+		return aCopy;
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 class Rational {
  public:
-	BigInteger denominator;
 	BigInteger numerator;
+	BigInteger denominator;
+
+	void makeIrreducible();
+
+	std::string _abs_asDecimal(size_t precision = 0) const;
 
  public:
 
 	Rational() {
-
+		this->numerator = BigInteger(0);
+		denominator = BigInteger(1);
+	}
+	Rational(const int a) {
+		this->numerator = BigInteger(a);
+		this->denominator = BigInteger(1);
+	}
+	Rational(const BigInteger &a) {
+		this->numerator = BigInteger(a);
+		this->denominator = BigInteger(1);
+	}
+	Rational(const int a, const int b) : numerator(a), denominator(b) {
+		this->makeIrreducible();
 	}
 
-	Rational(int value) {
-		this->numerator = BigInteger(value);
-		this->denominator = 1;
+	Rational(const BigInteger &a, const BigInteger &b) : numerator(a), denominator(b) {
+		this->makeIrreducible();
 	}
 
-	Rational(const Rational& r) {
-		this->numerator = r.numerator;
-		this->denominator = r.denominator;
-	}
+	std::string toString();
 
-	Rational(const BigInteger& b) {
-		this->numerator = b;
-		this->denominator = 1;
-	}
+	std::string asDecimal(size_t precision = 0) const ;
 
-	std::string asDecimal(int value){
-		if (value == 1)
-			return "1.0";
-		return "1.00";
-	}
-
-	std::string toString() {
-		return "1234567890";
-	}
-
-	Rational& operator +=(const Rational& a) {
-		this->numerator = a.numerator;
-		this->denominator = a.denominator;
-		return *this;
-	}
-
-	Rational& operator -=(const Rational& a) {
-		this->numerator = a.numerator;
-		this->denominator = a.denominator;
-		return *this;
-
-	}
-
-	Rational& operator *=(const Rational& a) {
-		this->numerator = a.numerator;
-		this->denominator = a.denominator;
-		return *this;
-	}
-
-	Rational& operator /=(const Rational& a) {
-		this->numerator = a.numerator;
-		this->denominator = a.denominator;
-		return *this;
-
-	}
-
-	Rational operator -()  const {
-		Rational result = *this;
-		result.numerator *= -1;
-		result.denominator = this->denominator;
-		return result;
+	explicit operator double() const {
+		return std::stold(this->asDecimal(350));
 	}
 
 };
 
-Rational operator +(const Rational& r1, const Rational& r2) {
-	Rational result = r1;
-	result.numerator += r2.numerator;
-	return r1;
+void Rational::makeIrreducible() {
+	BigInteger reduce = gcd(this->numerator, this->denominator);
+	this->numerator /= reduce;
+	this->denominator /= reduce;
+	if (this->denominator < BigInteger(0)) {
+		this->denominator *= -1;
+		this->numerator *= -1;
+	}
 }
 
-Rational operator -(const Rational& r1, const Rational& r2) {
-	Rational result = r1;
-	result.numerator -= r2.numerator;
-	return r1;
+std::string Rational::toString() {
+	std::string result = this->numerator.toString();
+	if (this->denominator != BigInteger(1))
+		result += "/" + this->denominator.toString();
+	return result;
 }
 
-Rational operator *(const Rational& r1, const Rational& r2) {Rational result = r1;
-	result.numerator *= r2.numerator;
-	return r1;
-}
-
-Rational operator /(const Rational& r1, const Rational& r2) {
-	Rational result = r1;
-	result.numerator /= r2.numerator;
-	return r1;
-}
-bool operator <(const Rational& a, const Rational& b) {
-	return a.numerator < b.numerator;
-}
-
-bool operator >(const Rational& a, const Rational& b) {
-	return b < a;
-}
-
-bool operator ==(const Rational& a, const Rational& b) {
-	return !(a < b) && !(a > b);
-}
-
-bool operator <=(const Rational& a, const Rational& b) {
-	return !(a > b);
-}
-
-bool operator >=(const Rational& a, const Rational& b) {
-	return !(a < b);
-}
-
-bool operator !=(const Rational& a, const Rational& b) {
-	return !(a == b);
+std::string Rational::asDecimal(size_t precision) const {
+	Rational tmp = *this;
+	tmp.numerator = tmp.numerator.absoluteValue();
+	std::string result = *this < 0 ? "-" : "";
+	result += (tmp.numerator / tmp.denominator).toString();
+	result.push_back('.');
+	tmp -= tmp.numerator / tmp.denominator;
+	for (unsigned int i = 0; i < precision; ++i) {
+		tmp *= Rational(10);
+		result += (tmp.numerator / tmp.denominator).toString();
+		tmp -= tmp.numerator / tmp.denominator;
+	}
+	return result;
 }
 
 int main(){
-	BigInteger a, b, k;
-	b = 0, k = 1234567;
-	std::ostream& oss = std::cout;
-	oss << b << ' ' << k;
-	a = -a;
-	std::string testString = a.toString() + " " + (-k).toString();
-	oss << testString << std::endl;
-	a = 999, b = 1000;
-	a = a += a;
-	testString = a.toString();
-	++a %= a /= a *= a -= b++;
-	oss << 5+a << ' ' << 1-b; // 5 -1000
-	oss << (a = (bool(a) ? -1 : -2));
-	std::cin >> a >> b;
-	oss << b << ' ' << a << ' ';
-	oss << a+b << ' ' << a-b << ' ' << a*b << ' ' << a/b << ' ' << a%b << '\n';
-	std::vector<BigInteger> v;
-	for (int i = 0; i <1000 ; ++i) {
-		v.push_back(1000 - i);
-	}
-	oss << v[0] << ' ' << v[500] << ' ' << v[999] << ' ';
-	oss << (a != b) << ' ' << (a < b) << ' ' << (a > b) << ' ';
-	oss << (a <= b) << ' ' << (a >= b);
-	BigInteger c, d, e, f;
-	std::istream& iss = std::cin;
-	iss >> a >> b;
-	oss << b << a;
-	iss >> c >> d;
-	iss >> e >> f;
-	oss << a+b << ' ' << c+d << ' ' << e+f;
-	oss << a-b << ' ' << c-d << ' ' << e-f;
-	oss << a*b << ' ' << c*d << ' ' << e*f;
-	oss << a/b << ' ' << c/d << ' ' << e/f;
-	oss << a%b << ' ' << c%d << ' ' << e%f;
+
 }
