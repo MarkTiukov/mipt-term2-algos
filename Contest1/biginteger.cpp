@@ -222,6 +222,8 @@ class BigInteger {
 
 	BigInteger& operator /=(const BigInteger& a);
 
+	BigInteger& operator %=(const BigInteger& a);
+
 	BigInteger& operator ++() {
 		return *this += 1;
 	}
@@ -333,7 +335,7 @@ int main() {
 	std::cin >> b;
 	int a1 = int(a);
 	int b1 = int(b);
-	a /= b;
+	a *= a;
 	std::cout << a << std::endl;
 	std::cout << a1 / b1 << std::endl;
 }
@@ -470,5 +472,11 @@ BigInteger& BigInteger::operator /=(const BigInteger &a) {
 	if (answer == 0)
 		answer.sign = 0;
 	*this = answer;
+	return *this;
+}
+
+BigInteger& BigInteger::operator %=(const BigInteger &a) {
+	BigInteger integerPart = *this / a;
+	*this -= (integerPart * a);
 	return *this;
 }
