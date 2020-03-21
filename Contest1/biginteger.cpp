@@ -220,6 +220,8 @@ class BigInteger {
 
 	BigInteger& operator *=(const BigInteger& a);
 
+	BigInteger& operator /=(const BigInteger& a);
+
 	BigInteger& operator ++() {
 		return *this += 1;
 	}
@@ -263,6 +265,8 @@ BigInteger operator *(const BigInteger& a, const BigInteger& b) {
 	result *= b;
 	return result;
 }
+
+
 
 std::ostream& operator <<(std::ostream& out, const BigInteger& a) {
 	out << a.toString();
@@ -323,11 +327,14 @@ int main() {
 	BigInteger a, b;
 	std::cin >> a;
 	std::cin >> b;
-	a *= b;
+	int a1 = int(a);
+	int b1 = int(b);
+	a /= b;
 	std::cout << a << std::endl;
+	std::cout << a1 / b1 << std::endl;
 }
 
-BigInteger &BigInteger::operator *=(const BigInteger &a) {
+BigInteger& BigInteger::operator *=(const BigInteger &a) {
 	this->sign *= a.sign;
 	if (this->sign == 0) {
 		this->number = std::vector<int>(1, 0);
@@ -404,10 +411,6 @@ BigInteger &BigInteger::operator *=(const BigInteger &a) {
 		y2.number.push_back(a.number[i]);
 	}
 
-	// std::cout << "x: " << x1 << " " << x2 << std::endl;
-	// std::cout << "y: " << y1 << " " << y2 << std::endl;
-
-
 	BigInteger x1y1 = x1;
 	x1y1 *= y1;
 	BigInteger x2y2 = x2;
@@ -425,5 +428,43 @@ BigInteger &BigInteger::operator *=(const BigInteger &a) {
 	while (this->number.size() > 1 && this->number[this->number.size() - 1] == 0) {
 		this->number.pop_back();
 	}
+	return *this;
+}
+
+BigInteger& BigInteger::operator /=(const BigInteger &a) {
+	if (this->sign == 0) {
+		return *this;
+	}
+	BigInteger answer = 0;
+	answer.number.clear();
+	BigInteger dividend = *this;
+	BigInteger divisor = a;
+	divisor.sign = 1;
+	dividend.sign = 1;
+	while (divisor <= dividend) {
+		divisor *= 10;
+	}
+	while (divisor.size() >= a.size()) {
+		int counter = 0;
+		while (divisor <= dividend) {
+			dividend -= divisor;
+			counter++;
+		}
+		answer.number.push_back(counter);
+		for (int i = 0; i < int(divisor.number.size()) - 1; i++) {
+			std::swap(divisor.number[i], divisor.number[i + 1]);
+		}
+		divisor.number.pop_back();
+	}
+	for (int i = 0; i < answer.number.size() / 2; i++) {
+		std::swap(answer.number[i], answer.number[answer.number.size() - 1 - i]);
+	}
+	while (answer.number.size() > 1 && answer.number[answer.number.size() - 1] == 0) {
+		answer.number.pop_back();
+	}
+	answer.sign = (a.sign * this->sign);
+	if (answer == 0)
+		answer.sign = 0;
+	*this = answer;
 	return *this;
 }
