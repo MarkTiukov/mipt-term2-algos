@@ -1,9 +1,12 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <queue>
 
 int costA, costB;
 int M;
 int start, finish;
+const int MAX_VALUE = 2e9;
 
 struct Graph {
 	std::vector<std::vector<std::pair<int, int>>> graph;
@@ -15,13 +18,31 @@ struct Graph {
 
 };
 
+struct Node {
+	int number;
+	int distance = MAX_VALUE;
+
+	Node(int number, int distance) : number(number), distance(distance) {}
+};
+
+class myComparator {
+ public:
+	int operator()(const Node &a, const Node &b) {
+		return a.distance > b.distance;
+	}
+};
+
 void createGraph(Graph &graph);
+void dijkstra(Graph &graph, std::vector<int> &dist);
 
 int main() {
 	std::cin >> costA >> costB >> M >> start >> finish;
 	Graph graph(M);
 	createGraph(graph);
 	graph.print();
+	std::vector<int> dist(M, MAX_VALUE);
+	dist[start] = 0;
+
 }
 
 void createGraph(Graph &graph) {
@@ -47,5 +68,12 @@ void Graph::print() {
 		for (std::pair<int, int> pair: this->graph[from]) {
 			std::cout << "from " << from << " to " << pair.first << " with weight " << pair.second << std::endl;
 		}
+	}
+}
+
+void dijkstra(Graph &graph, std::vector<int> &dist) {
+	std::priority_queue<Node, std::vector<Node>, myComparator> queue;
+	for (int i: dist) {
+		queue.emplace();
 	}
 }
