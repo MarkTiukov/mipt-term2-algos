@@ -15,6 +15,7 @@ struct Graph {
 
 	void add(int from, int to, int weight);
 	void print();
+	int size();
 
 };
 
@@ -39,10 +40,10 @@ int main() {
 	std::cin >> costA >> costB >> M >> start >> finish;
 	Graph graph(M);
 	createGraph(graph);
-	graph.print();
 	std::vector<int> dist(M, MAX_VALUE);
 	dist[start] = 0;
-
+	dijkstra(graph, dist);
+	std::cout << dist[finish] << std::endl;
 }
 
 void createGraph(Graph &graph) {
@@ -71,9 +72,25 @@ void Graph::print() {
 	}
 }
 
+int Graph::size() {
+	return this->graph.size();
+}
+
 void dijkstra(Graph &graph, std::vector<int> &dist) {
 	std::priority_queue<Node, std::vector<Node>, myComparator> queue;
-	for (int i: dist) {
-		queue.emplace();
+	std::vector<bool> used(graph.size(), false);
+	queue.emplace(Node(start, 0));
+	while (queue.size() > 0) {
+		Node current = queue.top();
+		queue.pop();
+		if (current.distance == dist[current.number]) {
+			for (auto neighbor: graph.graph[current.number]) {
+				int alternative = dist[current.number] + neighbor.second;
+				if (alternative < dist[neighbor.first]) {
+					dist[neighbor.first] = alternative;
+					queue.push(Node(neighbor.first, alternative));
+				}
+			}
+		}
 	}
 }
