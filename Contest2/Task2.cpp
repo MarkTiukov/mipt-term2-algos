@@ -23,8 +23,12 @@ struct Graph {
 struct Node {
 	int number;
 	int distance = MAX_VALUE;
+	int numberOfSteps = 0;
 
 	Node(int number, int distance) : number(number), distance(distance) {}
+	Node(int number, int distance, int number_of_steps)
+			: number(number), distance(distance), numberOfSteps(number_of_steps) {}
+
 };
 
 class myComparator {
@@ -39,16 +43,19 @@ void dijkstra(Graph &graph, std::vector<int> &dist);
 int main() {
 	int n, m;
 	std::cin >> n >> m >> k >> start >> finish;
+	start--;
+	finish--;
 	Graph graph(n);
 	for (int i = 0; i < m; ++i) {
 		int from, to, cost;
 		std::cin >> from >> to >> cost;
 		graph.add(--from, --to, cost);
 	}
+	// graph.print();
 	std::vector<int> dist(n, MAX_VALUE);
 	dist[start] = 0;
 	dijkstra(graph, dist);
-	std::cout << dist[finish] << std::endl;
+	std::cout << (dist[finish] == MAX_VALUE ? -1 : dist[finish]) << std::endl;
 }
 
 void Graph::add(int from, int to, int weight) {
@@ -58,7 +65,7 @@ void Graph::add(int from, int to, int weight) {
 
 void Graph::print() {
 	for (int from = 0; from < this->graph.size(); ++from) {
-		for (std::pair<int, int> pair: this->graph[from]) {
+		for (auto pair: this->graph[from]) {
 			std::cout << "from " << from << " to " << pair.first << " with weight " << pair.second << std::endl;
 		}
 	}
@@ -75,12 +82,12 @@ void dijkstra(Graph &graph, std::vector<int> &dist) {
 	while (queue.size() > 0) {
 		Node current = queue.top();
 		queue.pop();
-		if (current.distance == dist[current.number]) {
+		if (current.distance == dist[current.number] && current.numberOfSteps < k) {
 			for (auto neighbor: graph.graph[current.number]) {
 				int alternative = dist[current.number] + neighbor.second;
 				if (alternative < dist[neighbor.first]) {
 					dist[neighbor.first] = alternative;
-					queue.push(Node(neighbor.first, alternative));
+					queue.push(Node(neighbor.first, alternative, current.numberOfSteps + 1));
 				}
 			}
 		}
