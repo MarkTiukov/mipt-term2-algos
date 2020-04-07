@@ -3,9 +3,10 @@
 #include <vector>
 #include <algorithm>
 #include <queue>
+#include <iomanip>
 
 int start, finish;
-const double MAX_VALUE = 2e9;
+const double MAX_VALUE = -2e9;
 
 struct Graph {
 	std::vector<std::vector<std::pair<int, double>>> graph;
@@ -29,7 +30,7 @@ struct Node {
 class myComparator {
  public:
 	int operator()(const Node &a, const Node &b) {
-		return a.distance > b.distance;
+		return a.distance < b.distance;
 	}
 };
 
@@ -45,13 +46,16 @@ int main() {
 		int from, to;
 		double cost;
 		std::cin >> from >> to >> cost;
-		graph.add(--from, --to, cost);
+		cost = 1.0 - cost / 100.0;
+		--from;
+		--to;
+		graph.add(from, to, cost);
+		graph.add(to, from, cost);
 	}
-	// graph.print();
 	std::vector<double> dist(n, MAX_VALUE);
-	dist[start] = 0;
+	dist[start] = 1;
 	dijkstra(graph, dist);
-	std::cout << (dist[finish] == MAX_VALUE ? -1 : dist[finish]) << std::endl;
+	std::cout << std::setprecision(6) << 1 - dist[finish] << std::endl;
 }
 
 void Graph::add(int from, int to, double weight) {
@@ -73,15 +77,14 @@ int Graph::size() {
 
 void dijkstra(Graph &graph, std::vector<double> &dist) {
 	std::priority_queue<Node, std::vector<Node>, myComparator> queue;
-	std::vector<bool> used(graph.size(), false);
-	queue.emplace(Node(start, 0));
+	queue.emplace(Node(start, 1));
 	while (queue.size() > 0) {
 		Node current = queue.top();
 		queue.pop();
 		if (current.distance == dist[current.number]) {
 			for (auto neighbor: graph.graph[current.number]) {
-				int alternative = dist[current.number] + neighbor.second;
-				if (alternative < dist[neighbor.first]) {
+				double alternative = dist[current.number] * neighbor.second;
+				if (alternative > dist[neighbor.first]) {
 					dist[neighbor.first] = alternative;
 					queue.push(Node(neighbor.first, alternative));
 				}
