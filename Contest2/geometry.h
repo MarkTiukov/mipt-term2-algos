@@ -42,8 +42,8 @@ class Line {
 
 class Shape {
  public:
-	virtual double perimeter() = 0;
-	virtual double area() = 0;
+	virtual double perimeter() const = 0;
+	virtual double area() const = 0;
 //  virtual bool operator==(const Shape &another) = 0;
 //  virtual bool isCongruentTo(const Shape &another) = 0;
 //    virtual bool isSimilarTo(const Shape &another) = 0;
@@ -76,9 +76,9 @@ class Polygon : public Shape {
 
 	Polygon(const std::vector<Point> &points) : points(points) {}
 
-	double perimeter() override;
-	double area() override;
-	int verticesCount() { return this->points.size(); }
+	double perimeter() const override;
+	double area() const override;
+	int verticesCount() const { return this->points.size(); }
 	void print();
 
 };
@@ -172,7 +172,7 @@ class Triangle : public Polygon {
 	// Circle ninePointsCircle() - его окружность Эйлера.
 };
 
-double Polygon::perimeter() {
+double Polygon::perimeter() const {
 	double result = 0.0;
 	for (int i = 1; i < this->points.size(); ++i) {
 		result += Line::length(this->points[i - 1], this->points[i]);
@@ -184,7 +184,7 @@ void Polygon::print() {
 		std::cout << "point " << p.x << " " << p.y << std::endl;
 	}
 }
-double Polygon::area() {
+double Polygon::area() const {
 	double sum = 0.0;
 	for (int i = 0; i < this->points.size(); ++i) {
 		sum += (this->points[i].x * this->points[(i + 1) % this->points.size()].y
