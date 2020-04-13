@@ -91,12 +91,6 @@ class Polygon : public Shape {
 
 	Polygon() {}
 
-	/*template<Point &head, Point &...tail>
-	Polygon() {
-		this->points.push_back(head);
-		Polygon(tail...);
-	}*/
-
 	template<class ... Points>
 	Polygon(Points &&... points) : points{std::forward<Points>(points)...} { makeVectors(); }
 	Polygon(const std::vector<Point> &points) : points(points) { makeVectors(); }
