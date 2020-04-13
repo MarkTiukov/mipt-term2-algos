@@ -5,7 +5,7 @@
 #include <iomanip>
 
 int main() {
-	std::vector<Point> points;
+	/*std::vector<Point> points;
 	int n = 0;
 	std::cin >> n;
 	for (int i = 0; i < n; ++i) {
@@ -15,7 +15,9 @@ int main() {
 	}
 	Polygon polygon = Polygon(points);
 	polygon.print();
-	std::cout << std::setprecision(15) << polygon.area() << std::endl;
-	return 0;
+	std::cout << std::setprecision(15) << polygon.area() << std::endl;*/
+	Polygon p1 = Polygon(Point(0, 0), Point(1, 0), Point(0, 1));
+	Polygon p2 = Polygon(Point(1, 0), Point(0, 0), Point(0, 1));
+	std::cout << (p1 == p2) << std::endl;
 }
 

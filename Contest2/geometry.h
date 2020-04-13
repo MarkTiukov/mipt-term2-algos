@@ -57,8 +57,6 @@ class Shape {
 
 class Polygon : public Shape {
 	//TODO
-	// Можно сконструировать многоугольник из точек, передаваемых в качестве параметров через запятую (т.е. неуказанное число аргументов)
-	// operator==(const Shape& another) - совпадает ли эта фигура с другой;
 	// isCongruentTo(const Shape& another) - равна ли эта фигура другой в геометрическом смысле;
 	// isSimilarTo(const Shape& another) - подобна ли эта фигура другой;
 	// containsPoint(Point point) - находится ли точка внутри фигуры.
@@ -74,12 +72,26 @@ class Polygon : public Shape {
 
  public:
 
+	Polygon() {}
+
+	/*template<Point &head, Point &...tail>
+	Polygon() {
+		this->points.push_back(head);
+		Polygon(tail...);
+	}*/
+
+	template<class ... Points>
+	Polygon(Points &&... points) : points{std::forward<Points>(points)...} {}
+
 	Polygon(const std::vector<Point> &points) : points(points) {}
 
 	double perimeter() const override;
 	double area() const override;
 	int verticesCount() const { return this->points.size(); }
 	void print();
+	bool isSimilarTo(const Polygon &another);
+
+	bool operator==(const Polygon &another);
 
 };
 
@@ -193,3 +205,21 @@ double Polygon::area() const {
 	return abs(sum) * 0.5;
 }
 
+bool Polygon::operator==(const Polygon &another) {
+	bool result = false;
+	if (this->points.size() == another.points.size()) {
+		int length = this->points.size();
+		int shift = 0;
+		while (shift < length && this->points[shift] != another.points[0]) { // finds a shift in numeration
+			++shift;
+		}
+		bool result1 = this->points[shift] == another.points[0];
+		bool result2 = result1;
+		for (int i = 0; i < length && (result1 || result2); ++i) {
+			result1 = result1 && this->points[(shift + i) % length] == another.points[i]; // for one direction
+			result2 = result2 && this->points[(length + shift - i) % length] == another.points[i]; // for another
+		}
+		result = result1 || result2;
+	}
+	return result;
+}
