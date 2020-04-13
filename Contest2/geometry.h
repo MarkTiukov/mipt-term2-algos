@@ -17,6 +17,10 @@ bool operator!=(const Point &a, const Point &b) {
 	return !(a == b);
 }
 
+Point operator-(const Point &a, const Point &b) {
+	return Point(a.x - b.x, a.y - b.y);
+}
+
 class Line {
 	std::vector<Point> points;
 	double slope;
@@ -55,6 +59,18 @@ class Shape {
 
 };
 
+double dot(const Point &a, const Point &b) { // dot production of vector a and vector b
+	return a.x * b.x + a.y * b.y;
+}
+
+double module(const Point &a) { // length of vector a
+	return std::sqrt(dot(a, a));
+}
+
+double cos(const Point &a, const Point &b) { // cos between vector a and vector b
+	return dot(a, b) / (module(a) * module(b));
+}
+
 class Polygon : public Shape {
 	//TODO
 	// isCongruentTo(const Shape& another) - равна ли эта фигура другой в геометрическом смысле;
@@ -69,6 +85,7 @@ class Polygon : public Shape {
 	// isConvex() - выпуклый ли
 
 	std::vector<Point> points;
+	std::vector<Point> vectors; // stores sides as vectors: v[i] = p[i + 1] - p[i]
 
  public:
 
@@ -81,17 +98,18 @@ class Polygon : public Shape {
 	}*/
 
 	template<class ... Points>
-	Polygon(Points &&... points) : points{std::forward<Points>(points)...} {}
-
-	Polygon(const std::vector<Point> &points) : points(points) {}
+	Polygon(Points &&... points) : points{std::forward<Points>(points)...} { makeVectors(); }
+	Polygon(const std::vector<Point> &points) : points(points) { makeVectors(); }
+	void makeVectors();
 
 	double perimeter() const override;
 	double area() const override;
 	int verticesCount() const { return this->points.size(); }
-	void print();
-	bool isSimilarTo(const Polygon &another);
+	bool isSimilarTo(const Polygon &another) const;
 
 	bool operator==(const Polygon &another);
+	void print() const;
+	size_t size() const { return this->points.size(); }
 
 };
 
@@ -191,7 +209,7 @@ double Polygon::perimeter() const {
 	}
 	return result + Line::length(this->points[0], this->points[this->points.size() - 1]);
 }
-void Polygon::print() {
+void Polygon::print() const {
 	for (Point p: this->points) {
 		std::cout << "point " << p.x << " " << p.y << std::endl;
 	}
@@ -220,6 +238,35 @@ bool Polygon::operator==(const Polygon &another) {
 			result2 = result2 && this->points[(length + shift - i) % length] == another.points[i]; // for another
 		}
 		result = result1 || result2;
+	}
+	return result;
+}
+
+void Polygon::makeVectors() {
+	for (int i = 0; i < this->points.size(); ++i) {
+		this->vectors.push_back(this->points[(i + 1) % this->points.size()] - this->points[i]);
+	}
+}
+
+bool Polygon::isSimilarTo(const Polygon &another) const {
+	bool result = false;
+	if (this->points.size() == another.points.size()) {
+		int length = this->points.size();
+		for (int shift = 0; shift < length; ++shift) {
+			bool
+					result1 = cos(this->vectors[shift], this->vectors[(shift + 1) % length])
+					== cos(another.vectors[0], another.vectors[1]);
+			bool result2 = result1;
+			for (int i = 0; i < length && (result1 || result2); ++i) {
+				result1 = result1 &&
+						cos(this->vectors[(shift + i) % length], this->vectors[(shift + i + 1) % length]) ==
+								cos(another.vectors[i], another.vectors[(i + 1) % length]); // for one direction
+				result2 = result2 &&
+						cos(this->vectors[(length + shift - i) % length], this->vectors[(length + shift - i + 1) % length]) ==
+								cos(another.vectors[i], another.vectors[(i + 1) % length]); // for another
+			}
+			result = result || result1 || result2;
+		}
 	}
 	return result;
 }
