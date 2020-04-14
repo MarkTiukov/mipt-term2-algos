@@ -85,12 +85,10 @@ int getSign(const double &number) {
 
 class Polygon : public Shape {
   //TODO
-  // containsPoint(Point point) - находится ли точка внутри фигуры.
   // rotate(Point center, double angle) - поворот на угол (в градусах, против часовой стрелки) относительно точки;
   // reflex(Point center) - симметрию относительно точки;
   // reflex(Line axis) - симметрию относительно прямой;
   // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
-  // isConvex() - выпуклый ли
 
   std::vector<Point> points;
   std::vector<Point> vectors; // stores sides as vectors: v[i] = p[i + 1] - p[i]
@@ -112,6 +110,7 @@ class Polygon : public Shape {
   bool isSimilarTo(const Polygon &another) const;
   bool containsPoint(const Point &point);
 
+  bool isConvex() const;
   bool operator==(const Polygon &another);
   void print() const;
   size_t size() const { return this->points.size(); }
@@ -316,34 +315,14 @@ bool Polygon::containsPoint(const Point &point) {
   return result;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+bool Polygon::isConvex() const {
+  bool result = true;
+  int sign = getSign(cross(this->vectors[0], this->vectors[1]));
+  if (sign == 0)
+	sign = getSign(cross(this->vectors[1], this->vectors[2]));
+  for (int i = 0; i < this->size() && result; ++i) {
+	int currentSign = getSign(cross(this->vectors[i], this->vectors[(i + 1) % this->size()]));
+	result = result && (sign == currentSign || currentSign == 0);
+  }
+  return result;
+}
