@@ -63,6 +63,10 @@ double dot(const Point &a, const Point &b) { // dot production of vector a and v
   return a.x * b.x + a.y * b.y;
 }
 
+double cross(const Point &a, const Point &b) {
+  return a.x * b.y - a.y * b.x;
+}
+
 double module(const Point &a) { // length of vector a
   return std::sqrt(dot(a, a));
 }
@@ -71,9 +75,16 @@ double cos(const Point &a, const Point &b) { // cos between vector a and vector 
   return dot(a, b) / (module(a) * module(b));
 }
 
+int getSign(const double &number) {
+  if (number > 0)
+	return 1;
+  if (number == 0)
+	return 0;
+  return -1;
+}
+
 class Polygon : public Shape {
   //TODO
-  // isCongruentTo(const Shape& another) - равна ли эта фигура другой в геометрическом смысле;
   // containsPoint(Point point) - находится ли точка внутри фигуры.
   // rotate(Point center, double angle) - поворот на угол (в градусах, против часовой стрелки) относительно точки;
   // reflex(Point center) - симметрию относительно точки;
@@ -99,6 +110,7 @@ class Polygon : public Shape {
   int verticesCount() const { return this->points.size(); }
   bool isCongruentTo(const Polygon &another) const;
   bool isSimilarTo(const Polygon &another) const;
+  bool containsPoint(const Point &point);
 
   bool operator==(const Polygon &another);
   void print() const;
@@ -289,3 +301,49 @@ bool Polygon::isCongruentTo(const Polygon &another) const {
   }
   return result;
 }
+
+bool Polygon::containsPoint(const Point &point) {
+  bool result = true;
+  int sign = getSign(cross(this->vectors[0], Point(point.x - this->points[0].x, point.y - this->points[0].y)));
+  if (sign == 0)
+	sign = getSign(cross(this->vectors[1], Point(point.x - this->points[1].x, point.y - this->points[1].y)));
+  if (sign == 0)
+	sign = getSign(cross(this->vectors[2], Point(point.x - this->points[2].x, point.y - this->points[2].y)));
+  for (int i = 0; i < this->size() && result; ++i) {
+	int currentSign = getSign(cross(this->vectors[i], Point(point.x - this->points[i].x, point.y - this->points[i].y)));
+	result = result && (sign == currentSign || currentSign == 0);
+  }
+  return result;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
