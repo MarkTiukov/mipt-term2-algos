@@ -103,8 +103,8 @@ double toRad(double angle) {
 
 void rotatePoint(const Point &center, const double &angle, Point &point) {
   double ang = toRad(angle);
-  double curCos = cos(toRad(angle));
-  double curSin = sin(toRad(angle));
+  double curCos = cos(ang);
+  double curSin = sin(ang);
   double shiftX = point.x - center.x;
   double shiftY = point.y - center.y;
   point.x = curCos * shiftX - curSin * shiftY + center.x;
@@ -112,9 +112,6 @@ void rotatePoint(const Point &center, const double &angle, Point &point) {
 }
 
 class Polygon : public Shape {
-  //TODO
-  // reflex(Line axis) - симметрию относительно прямой;
-  // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
  protected:
   std::vector<Point> points;
   std::vector<Point> vectors; // stores sides as vectors: v[i] = p[i + 1] - p[i]
@@ -143,6 +140,7 @@ class Polygon : public Shape {
   void rotate(const Point &center, const double &angle);
   void reflex(const Point &center);
   void reflex(const Line &axis);
+  void scale(const Point &center, const double &coefficient);
 
 };
 
@@ -418,6 +416,15 @@ void Polygon::reflex(const Line &axis) {
 	double currentY = this->points[i].y;
 	this->points[i].x = 2 * (currentX - slope * (shift - currentY)) / denominator - currentX;
 	this->points[i].y = (slope * (2 * currentX + slope * currentY) + 2 * shift - currentY) / denominator;
+  }
+  this->vectors = std::vector<Point>();
+  this->makeVectors();
+}
+
+void Polygon::scale(const Point &center, const double &coefficient) {
+  for (int i = 0; i < this->size(); ++i) {
+	this->points[i].x = coefficient * (this->points[i].x - center.x) + center.x;
+	this->points[i].y = coefficient * (this->points[i].y - center.y) + center.y;
   }
   this->vectors = std::vector<Point>();
   this->makeVectors();
