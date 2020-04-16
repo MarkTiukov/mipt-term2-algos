@@ -255,7 +255,7 @@ class Circle : public Ellipse {
 
 double Polygon::perimeter() const {
   double result = 0.0;
-  for (int i = 1; i < this->points.size(); ++i) {
+  for (size_t i = 1; i < this->points.size(); ++i) {
 	result += Line::length(this->points[i - 1], this->points[i]);
   }
   return result + Line::length(this->points[0], this->points[this->points.size() - 1]);
@@ -267,7 +267,7 @@ void Polygon::print() const {
 }
 double Polygon::area() const {
   double sum = 0.0;
-  for (int i = 0; i < this->points.size(); ++i) {
+  for (size_t i = 0; i < this->points.size(); ++i) {
 	sum += (this->points[i].x * this->points[(i + 1) % this->points.size()].y
 		- this->points[i].y * this->points[(i + 1) % this->points.size()].x);
   }
@@ -277,14 +277,14 @@ double Polygon::area() const {
 bool Polygon::operator==(const Polygon &another) {
   bool result = false;
   if (this->points.size() == another.points.size()) {
-	int length = this->points.size();
+	size_t length = this->points.size();
 	int shift = 0;
 	while (shift < length && this->points[shift] != another.points[0]) { // finds a shift in numeration
 	  ++shift;
 	}
 	bool result1 = this->points[shift] == another.points[0];
 	bool result2 = result1;
-	for (int i = 0; i < length && (result1 || result2); ++i) {
+	for (size_t i = 0; i < length && (result1 || result2); ++i) {
 	  result1 = result1 && this->points[(shift + i) % length] == another.points[i]; // for one direction
 	  result2 = result2 && this->points[(length + shift - i) % length] == another.points[i]; // for another
 	}
@@ -294,8 +294,8 @@ bool Polygon::operator==(const Polygon &another) {
 }
 
 void Polygon::makeVectors() {
-  for (int i = 0; i < this->points.size(); ++i) {
-	this->vectors.push_back(this->points[(i + 1) % this->points.size()] - this->points[i]);
+  for (size_t i = 0; i < this->size(); ++i) {
+	this->vectors.push_back(this->points[(i + 1) % this->size()] - this->points[i]);
   }
 }
 
@@ -330,12 +330,12 @@ bool Polygon::isCongruentTo(const Polygon &another) const {
   bool result = false;
   if (this->isSimilarTo(another)) {
 	if (this->points.size() == another.points.size()) {
-	  int length = this->points.size();
-	  for (int shift = 0; shift < length; ++shift) {
+	  size_t length = this->points.size();
+	  for (size_t shift = 0; shift < length; ++shift) {
 		bool result1;
 		result1 = module(this->vectors[shift]) == module(another.vectors[0]);
 		bool result2 = result1;
-		for (int i = 0; i < length && (result1 || result2); ++i) {
+		for (size_t i = 0; i < length && (result1 || result2); ++i) {
 		  result1 = result1 &&
 			  module(this->vectors[(shift + i) % length]) == module(another.vectors[i]); // for one direction
 		  result2 = result2 &&
@@ -355,7 +355,7 @@ bool Polygon::containsPoint(const Point &point) {
 	sign = getSign(cross(this->vectors[1], Point(point.x - this->points[1].x, point.y - this->points[1].y)));
   if (sign == 0)
 	sign = getSign(cross(this->vectors[2], Point(point.x - this->points[2].x, point.y - this->points[2].y)));
-  for (int i = 0; i < this->size() && result; ++i) {
+  for (size_t i = 0; i < this->size() && result; ++i) {
 	int currentSign = getSign(cross(this->vectors[i], Point(point.x - this->points[i].x, point.y - this->points[i].y)));
 	result = result && (sign == currentSign || currentSign == 0);
   }
@@ -367,7 +367,7 @@ bool Polygon::isConvex() const {
   int sign = getSign(cross(this->vectors[0], this->vectors[1]));
   if (sign == 0)
 	sign = getSign(cross(this->vectors[1], this->vectors[2]));
-  for (int i = 0; i < this->size() && result; ++i) {
+  for (size_t i = 0; i < this->size() && result; ++i) {
 	int currentSign = getSign(cross(this->vectors[i], this->vectors[(i + 1) % this->size()]));
 	result = result && (sign == currentSign || currentSign == 0);
   }
@@ -392,7 +392,7 @@ bool Rectangle::operator==(const Rectangle &another) {
 }
 
 void Polygon::rotate(const Point &center, const double &angle) {
-  for (int i = 0; i < this->size(); ++i) {
+  for (size_t i = 0; i < this->size(); ++i) {
 	rotatePoint(center, angle, this->points[i]);
   }
   this->vectors = std::vector<Point>();
@@ -400,7 +400,7 @@ void Polygon::rotate(const Point &center, const double &angle) {
 }
 
 void Polygon::reflex(const Point &center) {
-  for (int i = 0; i < this->size(); ++i) {
+  for (size_t i = 0; i < this->size(); ++i) {
 	this->points[i] = Point(2 * center.x - this->points[i].x, 2 * center.y - this->points[i].y);
   }
   this->vectors = std::vector<Point>();
@@ -411,7 +411,7 @@ void Polygon::reflex(const Line &axis) {
   double denominator = 1 + axis.getSlope() * axis.getSlope();
   double slope = axis.getSlope();
   double shift = axis.getShift();
-  for (int i = 0; i < this->size(); ++i) {
+  for (size_t i = 0; i < this->size(); ++i) {
 	double currentX = this->points[i].x;
 	double currentY = this->points[i].y;
 	this->points[i].x = 2 * (currentX - slope * (shift - currentY)) / denominator - currentX;
@@ -422,7 +422,7 @@ void Polygon::reflex(const Line &axis) {
 }
 
 void Polygon::scale(const Point &center, const double &coefficient) {
-  for (int i = 0; i < this->size(); ++i) {
+  for (size_t i = 0; i < this->size(); ++i) {
 	this->points[i].x = coefficient * (this->points[i].x - center.x) + center.x;
 	this->points[i].y = coefficient * (this->points[i].y - center.y) + center.y;
   }
