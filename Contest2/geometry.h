@@ -1,11 +1,15 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <iomanip>
+
+const double PI = 3.14159265358;
 
 struct Point {
   double x = 0;
   double y = 0;
 
+  Point() {}
   Point(double x, double y) : x(x), y(y) {}
 };
 
@@ -83,13 +87,27 @@ int getSign(const double &number) {
   return -1;
 }
 
+double toRad(double angle) {
+  return PI * angle / 180.0;
+}
+
+void rotatePoint(const Point &center, const double &angle, Point &point) {
+  double ang = toRad(angle);
+  double curCos = cos(toRad(angle));
+  double curSin = sin(toRad(angle));
+  double shiftX = point.x - center.x;
+  double shiftY = point.y - center.y;
+  point.x = curCos * shiftX - curSin * shiftY + center.x;
+  point.y = curSin * shiftX + curCos * shiftY + center.y;
+}
+
 class Polygon : public Shape {
   //TODO
   // rotate(Point center, double angle) - поворот на угол (в градусах, против часовой стрелки) относительно точки;
   // reflex(Point center) - симметрию относительно точки;
   // reflex(Line axis) - симметрию относительно прямой;
   // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
-
+ protected:
   std::vector<Point> points;
   std::vector<Point> vectors; // stores sides as vectors: v[i] = p[i + 1] - p[i]
 
@@ -114,49 +132,12 @@ class Polygon : public Shape {
   bool operator==(const Polygon &another);
   void print() const;
   size_t size() const { return this->points.size(); }
-
-};
-
-class Ellipse : public Shape {
-  //TODO
-  // Эллипс можно сконструировать из двух точек и double (два фокуса и сумма расстояний от эллипса до них);
-  // perimeter() -периметр;
-  // double area() - площадь;
-  // operator==(const Shape& another) - совпадает ли эта фигура с другой;
-  // isCongruentTo(const Shape& another) - равна ли эта фигура другой в геометрическом смысле;
-  // isSimilarTo(const Shape& another) - подобна ли эта фигура другой;
-  // containsPoint(Point point) - находится ли точка внутри фигуры.
-  // rotate(Point center, double angle) - поворот на угол (в градусах, против часовой стрелки) относительно точки;
-  // reflex(Point center) - симметрию относительно точки;
-  // reflex(Line axis) - симметрию относительно прямой;
-  // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
-  // std::pair<Point,Point> focuses() - его фокусы
-  // std::pair<Line, Line> directrices() - пару его директрис
-  // double eccentricity() - его эксцентриситет
-  // Point center() - его центр
-};
-
-class Circle : public Ellipse {
-  //TODO
-  // Круг можно задать точкой и числом (центр и радиус).
-  // perimeter() -периметр;
-  // double area() - площадь;
-  // operator==(const Shape& another) - совпадает ли эта фигура с другой;
-  // isCongruentTo(const Shape& another) - равна ли эта фигура другой в геометрическом смысле;
-  // isSimilarTo(const Shape& another) - подобна ли эта фигура другой;
-  // containsPoint(Point point) - находится ли точка внутри фигуры.
-  // rotate(Point center, double angle) - поворот на угол (в градусах, против часовой стрелки) относительно точки;
-  // reflex(Point center) - симметрию относительно точки;
-  // reflex(Line axis) - симметрию относительно прямой;
-  // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
-  // double radius() - радиус.
+  void rotate(const Point &center, const double &angle);
 };
 
 class Rectangle : public Polygon {
   //TODO
   // Прямоугольник можно сконструировать по двум точкам (его противоположным вершинам) и числу (отношению смежных сторон), причем из двух таких прямоугольников выбирается тот, у которого более короткая сторона расположена по левую сторону от диагонали, если смотреть от первой заданной точки в направлении второй.
-  // perimeter() -периметр;
-  // double area() - площадь;
   // operator==(const Shape& another) - совпадает ли эта фигура с другой;
   // isCongruentTo(const Shape& another) - равна ли эта фигура другой в геометрическом смысле;
   // isSimilarTo(const Shape& another) - подобна ли эта фигура другой;
@@ -167,6 +148,28 @@ class Rectangle : public Polygon {
   // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
   // Point center() - его центр
   // std::pair<Line, Line> diagonals() - пару его диагоналей.
+ protected:
+
+  double bigger;
+  double smaller;
+
+ public:
+
+  Rectangle(Point a, Point b, double ratio) {
+	//TODO
+	// make this constructor
+  }
+
+  template<class ... Points>
+  Rectangle(Points &&... points) : Polygon(points...) {
+	double a = module(this->vectors[0]);
+	double b = module(this->vectors[1]);
+	this->bigger = std::max(a, b);
+	this->smaller = std::min(a, b);
+  }
+
+  bool operator==(const Rectangle &another);
+
 };
 
 class Square : public Rectangle {
@@ -206,6 +209,41 @@ class Triangle : public Polygon {
   // Circle ninePointsCircle() - его окружность Эйлера.
 };
 
+class Ellipse : public Shape {
+  //TODO
+  // Эллипс можно сконструировать из двух точек и double (два фокуса и сумма расстояний от эллипса до них);
+  // perimeter() -периметр;
+  // double area() - площадь;
+  // operator==(const Shape& another) - совпадает ли эта фигура с другой;
+  // isCongruentTo(const Shape& another) - равна ли эта фигура другой в геометрическом смысле;
+  // isSimilarTo(const Shape& another) - подобна ли эта фигура другой;
+  // containsPoint(Point point) - находится ли точка внутри фигуры.
+  // rotate(Point center, double angle) - поворот на угол (в градусах, против часовой стрелки) относительно точки;
+  // reflex(Point center) - симметрию относительно точки;
+  // reflex(Line axis) - симметрию относительно прямой;
+  // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
+  // std::pair<Point,Point> focuses() - его фокусы
+  // std::pair<Line, Line> directrices() - пару его директрис
+  // double eccentricity() - его эксцентриситет
+  // Point center() - его центр
+};
+
+class Circle : public Ellipse {
+  //TODO
+  // Круг можно задать точкой и числом (центр и радиус).
+  // perimeter() -периметр;
+  // double area() - площадь;
+  // operator==(const Shape& another) - совпадает ли эта фигура с другой;
+  // isCongruentTo(const Shape& another) - равна ли эта фигура другой в геометрическом смысле;
+  // isSimilarTo(const Shape& another) - подобна ли эта фигура другой;
+  // containsPoint(Point point) - находится ли точка внутри фигуры.
+  // rotate(Point center, double angle) - поворот на угол (в градусах, против часовой стрелки) относительно точки;
+  // reflex(Point center) - симметрию относительно точки;
+  // reflex(Line axis) - симметрию относительно прямой;
+  // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
+  // double radius() - радиус.
+};
+
 double Polygon::perimeter() const {
   double result = 0.0;
   for (int i = 1; i < this->points.size(); ++i) {
@@ -215,7 +253,7 @@ double Polygon::perimeter() const {
 }
 void Polygon::print() const {
   for (Point p: this->points) {
-	std::cout << "point " << p.x << " " << p.y << std::endl;
+	std::cout << std::setprecision(9) << "point " << p.x << " " << p.y << std::endl;
   }
 }
 double Polygon::area() const {
@@ -325,4 +363,27 @@ bool Polygon::isConvex() const {
 	result = result && (sign == currentSign || currentSign == 0);
   }
   return result;
+}
+
+bool Rectangle::operator==(const Rectangle &another) {
+  bool result = false;
+  int length = 4;
+  int shift = 0;
+  while (shift < length && this->points[shift] != another.points[0]) { // finds a shift in numeration
+	++shift;
+  }
+  bool result1 = this->points[shift] == another.points[0];
+  bool result2 = result1;
+  for (int i = 0; i < 4 && (result1 || result2); ++i) {
+	result1 = result1 && this->points[(shift + i) % length] == another.points[i]; // for one direction
+	result2 = result2 && this->points[(length + shift - i) % length] == another.points[i]; // for another
+  }
+  result = result1 || result2;
+  return result;
+}
+
+void Polygon::rotate(const Point &center, const double &angle) {
+  for (int i = 0; i < this->size(); ++i) {
+	rotatePoint(center, angle, this->points[i]);
+  }
 }
