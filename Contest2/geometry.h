@@ -42,6 +42,16 @@ class Line {
 	this->shift = p1.y - p1.x * tmp;
   }
 
+  const std::vector<Point> &getPoints() const {
+	return points;
+  }
+  double getSlope() const {
+	return slope;
+  }
+  double getShift() const {
+	return shift;
+  }
+
   static double length(const Point &p1, const Point &p2) {
 	return std::sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
   }
@@ -103,7 +113,6 @@ void rotatePoint(const Point &center, const double &angle, Point &point) {
 
 class Polygon : public Shape {
   //TODO
-  // reflex(Point center) - симметрию относительно точки;
   // reflex(Line axis) - симметрию относительно прямой;
   // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
  protected:
@@ -133,6 +142,7 @@ class Polygon : public Shape {
   size_t size() const { return this->points.size(); }
   void rotate(const Point &center, const double &angle);
   void reflex(const Point &center);
+  void reflex(const Line &axis);
 
 };
 
@@ -394,6 +404,20 @@ void Polygon::rotate(const Point &center, const double &angle) {
 void Polygon::reflex(const Point &center) {
   for (int i = 0; i < this->size(); ++i) {
 	this->points[i] = Point(2 * center.x - this->points[i].x, 2 * center.y - this->points[i].y);
+  }
+  this->vectors = std::vector<Point>();
+  this->makeVectors();
+}
+
+void Polygon::reflex(const Line &axis) {
+  double denominator = 1 + axis.getSlope() * axis.getSlope();
+  double slope = axis.getSlope();
+  double shift = axis.getShift();
+  for (int i = 0; i < this->size(); ++i) {
+	double currentX = this->points[i].x;
+	double currentY = this->points[i].y;
+	this->points[i].x = 2 * (currentX - slope * (shift - currentY)) / denominator - currentX;
+	this->points[i].y = (slope * (2 * currentX + slope * currentY) + 2 * shift - currentY) / denominator;
   }
   this->vectors = std::vector<Point>();
   this->makeVectors();
