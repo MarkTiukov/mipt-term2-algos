@@ -103,7 +103,6 @@ void rotatePoint(const Point &center, const double &angle, Point &point) {
 
 class Polygon : public Shape {
   //TODO
-  // rotate(Point center, double angle) - поворот на угол (в градусах, против часовой стрелки) относительно точки;
   // reflex(Point center) - симметрию относительно точки;
   // reflex(Line axis) - симметрию относительно прямой;
   // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
@@ -133,6 +132,8 @@ class Polygon : public Shape {
   void print() const;
   size_t size() const { return this->points.size(); }
   void rotate(const Point &center, const double &angle);
+  void reflex(const Point &center);
+
 };
 
 class Rectangle : public Polygon {
@@ -386,4 +387,14 @@ void Polygon::rotate(const Point &center, const double &angle) {
   for (int i = 0; i < this->size(); ++i) {
 	rotatePoint(center, angle, this->points[i]);
   }
+  this->vectors = std::vector<Point>();
+  this->makeVectors();
+}
+
+void Polygon::reflex(const Point &center) {
+  for (int i = 0; i < this->size(); ++i) {
+	this->points[i] = Point(2 * center.x - this->points[i].x, 2 * center.y - this->points[i].y);
+  }
+  this->vectors = std::vector<Point>();
+  this->makeVectors();
 }
