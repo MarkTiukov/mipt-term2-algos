@@ -156,16 +156,6 @@ class Polygon : public Shape {
 
 class Rectangle : public Polygon {
   //TODO
-  // operator==(const Shape& another) - совпадает ли эта фигура с другой;
-  // isCongruentTo(const Shape& another) - равна ли эта фигура другой в геометрическом смысле;
-  // isSimilarTo(const Shape& another) - подобна ли эта фигура другой;
-  // containsPoint(Point point) - находится ли точка внутри фигуры.
-  // rotate(Point center, double angle) - поворот на угол (в градусах, против часовой стрелки) относительно точки;
-  // reflex(Point center) - симметрию относительно точки;
-  // reflex(Line axis) - симметрию относительно прямой;
-  // scale(Point center, double coefficient) - гомотетию с коэффициентом coefficient и центром center.
-  // Point center() - его центр
-  // std::pair<Line, Line> diagonals() - пару его диагоналей.
  protected:
 
   double bigger;
@@ -182,6 +172,9 @@ class Rectangle : public Polygon {
 	this->bigger = std::max(a, b);
 	this->smaller = std::min(a, b);
   }
+
+  Point center() const;
+  std::pair<Line, Line> diagonals() const;
 
 };
 
@@ -460,4 +453,12 @@ Rectangle::Rectangle(Point a, Point b, double ratio) {
   for (size_t i = 1; i < 4; ++i) {
 	rotatePoint(a, curCos, curSin, this->points[i]);
   }
+}
+
+Point Rectangle::center() const {
+  return Point((this->points[0].x + this->points[2].x) / 2, (this->points[0].y + this->points[2].y) / 2);
+}
+
+std::pair<Line, Line> Rectangle::diagonals() const {
+  return std::make_pair(Line(this->points[0], this->points[2]), Line(this->points[1], this->points[3]));
 }
