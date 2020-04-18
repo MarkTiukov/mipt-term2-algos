@@ -62,14 +62,14 @@ class Shape {
  public:
   virtual double perimeter() const = 0;
   virtual double area() const = 0;
-//  virtual bool operator==(const Shape &another) = 0;
-//  virtual bool isCongruentTo(const Shape &another) const = 0;
-//    virtual bool isSimilarTo(const Shape &another) const = 0;
-//    virtual bool containsPoint(Point point) const = 0;
-//    virtual void rotate(Point center, double angle) = 0;
-//    virtual void reflex(Point center) = 0;
-//    virtual void reflex(Line axis) = 0;
-//    virtual void scale(Point center, double coefficient) = 0;
+  virtual bool operator==(const Shape &another) = 0;
+  virtual bool isCongruentTo(const Shape &another) const = 0;
+  virtual bool isSimilarTo(const Shape &another) const = 0;
+  virtual bool containsPoint(const Point &point) const = 0;
+  virtual void rotate(const Point &center, const double &angle) = 0;
+  virtual void reflex(const Point &center) = 0;
+  virtual void reflex(const Line &axis) = 0;
+  virtual void scale(const Point &center, const double &coefficient) = 0;
 
 };
 
@@ -89,6 +89,10 @@ double cos(const Point &a, const Point &b) { // cos between vector a and vector 
   return dot(a, b) / (module(a) * module(b));
 }
 
+double sin(const Point &a, const Point &b) { // sin between vector a and vector b
+  return cross(a, b) / (module(a) * module(b));
+}
+
 int getSign(const double &number) {
   if (number > 0)
 	return 1;
@@ -101,14 +105,18 @@ double toRad(double angle) {
   return PI * angle / 180.0;
 }
 
-void rotatePoint(const Point &center, const double &angle, Point &point) {
-  double ang = toRad(angle);
-  double curCos = cos(ang);
-  double curSin = sin(ang);
+void rotatePoint(const Point &center, const double &curCos, const double &curSin, Point &point) {
   double shiftX = point.x - center.x;
   double shiftY = point.y - center.y;
   point.x = curCos * shiftX - curSin * shiftY + center.x;
   point.y = curSin * shiftX + curCos * shiftY + center.y;
+}
+
+void rotatePoint(const Point &center, const double &angle, Point &point) {
+  double ang = toRad(angle);
+  double curCos = cos(ang);
+  double curSin = sin(ang);
+  rotatePoint(center, curCos, curSin, point);
 }
 
 class Polygon : public Shape {
@@ -123,30 +131,31 @@ class Polygon : public Shape {
   template<class ... Points>
   Polygon(Points &&... points) : points{std::forward<Points>(points)...} { makeVectors(); }
   Polygon(const std::vector<Point> &points) : points(points) { makeVectors(); }
+
   void makeVectors();
   const std::vector<Point> &getPoints() const;
 
   double perimeter() const override;
   double area() const override;
   int verticesCount() const { return this->points.size(); }
-  bool isCongruentTo(const Polygon &another) const;
-  bool isSimilarTo(const Polygon &another) const;
-  bool containsPoint(const Point &point);
+  bool isCongruentTo(const Shape &another) const override;
+  bool isSimilarTo(const Shape &another) const override;
+  bool containsPoint(const Point &point) const override;
 
   bool isConvex() const;
-  bool operator==(const Polygon &another);
+  bool operator==(const Shape &another);
   void print() const;
+  void print(int precision) const;
   size_t size() const { return this->points.size(); }
-  void rotate(const Point &center, const double &angle);
-  void reflex(const Point &center);
-  void reflex(const Line &axis);
-  void scale(const Point &center, const double &coefficient);
+  void rotate(const Point &center, const double &angle) override;
+  void reflex(const Point &center) override;
+  void reflex(const Line &axis) override;
+  void scale(const Point &center, const double &coefficient) override;
 
 };
 
 class Rectangle : public Polygon {
   //TODO
-  // Прямоугольник можно сконструировать по двум точкам (его противоположным вершинам) и числу (отношению смежных сторон), причем из двух таких прямоугольников выбирается тот, у которого более короткая сторона расположена по левую сторону от диагонали, если смотреть от первой заданной точки в направлении второй.
   // operator==(const Shape& another) - совпадает ли эта фигура с другой;
   // isCongruentTo(const Shape& another) - равна ли эта фигура другой в геометрическом смысле;
   // isSimilarTo(const Shape& another) - подобна ли эта фигура другой;
@@ -164,10 +173,7 @@ class Rectangle : public Polygon {
 
  public:
 
-  Rectangle(Point a, Point b, double ratio) {
-	//TODO
-	// make this constructor
-  }
+  Rectangle(Point a, Point b, double ratio);
 
   template<class ... Points>
   Rectangle(Points &&... points) : Polygon(points...) {
@@ -176,8 +182,6 @@ class Rectangle : public Polygon {
 	this->bigger = std::max(a, b);
 	this->smaller = std::min(a, b);
   }
-
-  bool operator==(const Rectangle &another);
 
 };
 
@@ -260,11 +264,19 @@ double Polygon::perimeter() const {
   }
   return result + Line::length(this->points[0], this->points[this->points.size() - 1]);
 }
+
 void Polygon::print() const {
   for (Point p: this->points) {
 	std::cout << std::setprecision(9) << "point " << p.x << " " << p.y << std::endl;
   }
 }
+
+void Polygon::print(int precision) const {
+  for (Point p: this->points) {
+	std::cout << std::setprecision(precision) << "point " << p.x << " " << p.y << std::endl;
+  }
+}
+
 double Polygon::area() const {
   double sum = 0.0;
   for (size_t i = 0; i < this->points.size(); ++i) {
@@ -274,23 +286,28 @@ double Polygon::area() const {
   return abs(sum) * 0.5;
 }
 
-bool Polygon::operator==(const Polygon &another) {
-  bool result = false;
-  if (this->points.size() == another.points.size()) {
-	size_t length = this->points.size();
-	int shift = 0;
-	while (shift < length && this->points[shift] != another.points[0]) { // finds a shift in numeration
-	  ++shift;
+bool Polygon::operator==(const Shape &another) {
+  try {
+	const Polygon &copyAnother = dynamic_cast<const Polygon &>(another);
+	bool result = false;
+	if (this->points.size() == copyAnother.points.size()) {
+	  size_t length = this->points.size();
+	  int shift = 0;
+	  while (shift < length && this->points[shift] != copyAnother.points[0]) { // finds a shift in numeration
+		++shift;
+	  }
+	  bool result1 = this->points[shift] == copyAnother.points[0];
+	  bool result2 = result1;
+	  for (size_t i = 0; i < length && (result1 || result2); ++i) {
+		result1 = result1 && this->points[(shift + i) % length] == copyAnother.points[i]; // for one direction
+		result2 = result2 && this->points[(length + shift - i) % length] == copyAnother.points[i]; // for another
+	  }
+	  result = result1 || result2;
 	}
-	bool result1 = this->points[shift] == another.points[0];
-	bool result2 = result1;
-	for (size_t i = 0; i < length && (result1 || result2); ++i) {
-	  result1 = result1 && this->points[(shift + i) % length] == another.points[i]; // for one direction
-	  result2 = result2 && this->points[(length + shift - i) % length] == another.points[i]; // for another
-	}
-	result = result1 || result2;
+	return result;
+  } catch (...) {
+	return false;
   }
-  return result;
 }
 
 void Polygon::makeVectors() {
@@ -299,56 +316,66 @@ void Polygon::makeVectors() {
   }
 }
 
-bool Polygon::isSimilarTo(const Polygon &another) const {
-  bool result = false;
-  if (this->points.size() == another.points.size()) {
-	int length = this->points.size();
-	for (int shift = 0; shift < length; ++shift) {
-	  bool
-		  result1 = cos(this->vectors[shift], this->vectors[(shift + 1) % length])
-		  == cos(another.vectors[0], another.vectors[1]);
-	  bool result2 = result1;
-	  for (int i = 0; i < length && (result1 || result2); ++i) {
-		result1 = result1 &&
-			cos(this->vectors[(shift + i) % length], this->vectors[(shift + i + 1) % length]) ==
-				cos(another.vectors[i], another.vectors[(i + 1) % length]); // for one direction
-		result2 = result2 &&
-			cos(this->vectors[(length + shift - i) % length], this->vectors[(length + shift - i + 1) % length])
-				==
-					cos(another.vectors[i], another.vectors[(i + 1) % length]); // for another
+bool Polygon::isSimilarTo(const Shape &another) const {
+  try {
+	const Polygon &copyAnother = dynamic_cast<const Polygon &>(another);
+	bool result = false;
+	if (this->points.size() == copyAnother.points.size()) {
+	  int length = this->points.size();
+	  for (int shift = 0; shift < length; ++shift) {
+		bool
+			result1 = cos(this->vectors[shift], this->vectors[(shift + 1) % length])
+			== cos(copyAnother.vectors[0], copyAnother.vectors[1]);
+		bool result2 = result1;
+		for (int i = 0; i < length && (result1 || result2); ++i) {
+		  result1 = result1 &&
+			  cos(this->vectors[(shift + i) % length], this->vectors[(shift + i + 1) % length]) ==
+				  cos(copyAnother.vectors[i], copyAnother.vectors[(i + 1) % length]); // for one direction
+		  result2 = result2 &&
+			  cos(this->vectors[(length + shift - i) % length], this->vectors[(length + shift - i + 1) % length])
+				  ==
+					  cos(copyAnother.vectors[i], copyAnother.vectors[(i + 1) % length]); // for another
+		}
+		result = result || result1 || result2;
 	  }
-	  result = result || result1 || result2;
 	}
+	return result;
+  } catch (...) {
+	return false;
   }
-  return result;
 }
 const std::vector<Point> &Polygon::getPoints() const {
   return points;
 }
 
-bool Polygon::isCongruentTo(const Polygon &another) const {
-  bool result = false;
-  if (this->isSimilarTo(another)) {
-	if (this->points.size() == another.points.size()) {
-	  size_t length = this->points.size();
-	  for (size_t shift = 0; shift < length; ++shift) {
-		bool result1;
-		result1 = module(this->vectors[shift]) == module(another.vectors[0]);
-		bool result2 = result1;
-		for (size_t i = 0; i < length && (result1 || result2); ++i) {
-		  result1 = result1 &&
-			  module(this->vectors[(shift + i) % length]) == module(another.vectors[i]); // for one direction
-		  result2 = result2 &&
-			  module(this->vectors[(length + shift - i) % length]) == module(another.vectors[i]); // for another
+bool Polygon::isCongruentTo(const Shape &another) const {
+  try {
+	const Polygon &copyAnother = dynamic_cast<const Polygon &>(another);
+	bool result = false;
+	if (this->isSimilarTo(copyAnother)) {
+	  if (this->points.size() == copyAnother.points.size()) {
+		size_t length = this->points.size();
+		for (size_t shift = 0; shift < length; ++shift) {
+		  bool result1;
+		  result1 = module(this->vectors[shift]) == module(copyAnother.vectors[0]);
+		  bool result2 = result1;
+		  for (size_t i = 0; i < length && (result1 || result2); ++i) {
+			result1 = result1 &&
+				module(this->vectors[(shift + i) % length]) == module(copyAnother.vectors[i]); // for one direction
+			result2 = result2 &&
+				module(this->vectors[(length + shift - i) % length]) == module(copyAnother.vectors[i]); // for another
+		  }
+		  result = result || result1 || result2;
 		}
-		result = result || result1 || result2;
 	  }
 	}
+	return result;
+  } catch (...) {
+	return false;
   }
-  return result;
 }
 
-bool Polygon::containsPoint(const Point &point) {
+bool Polygon::containsPoint(const Point &point) const {
   bool result = true;
   int sign = getSign(cross(this->vectors[0], Point(point.x - this->points[0].x, point.y - this->points[0].y)));
   if (sign == 0)
@@ -371,23 +398,6 @@ bool Polygon::isConvex() const {
 	int currentSign = getSign(cross(this->vectors[i], this->vectors[(i + 1) % this->size()]));
 	result = result && (sign == currentSign || currentSign == 0);
   }
-  return result;
-}
-
-bool Rectangle::operator==(const Rectangle &another) {
-  bool result = false;
-  int length = 4;
-  int shift = 0;
-  while (shift < length && this->points[shift] != another.points[0]) { // finds a shift in numeration
-	++shift;
-  }
-  bool result1 = this->points[shift] == another.points[0];
-  bool result2 = result1;
-  for (int i = 0; i < 4 && (result1 || result2); ++i) {
-	result1 = result1 && this->points[(shift + i) % length] == another.points[i]; // for one direction
-	result2 = result2 && this->points[(length + shift - i) % length] == another.points[i]; // for another
-  }
-  result = result1 || result2;
   return result;
 }
 
@@ -428,4 +438,26 @@ void Polygon::scale(const Point &center, const double &coefficient) {
   }
   this->vectors = std::vector<Point>();
   this->makeVectors();
+}
+
+Rectangle::Rectangle(Point a, Point b, double ratio) {
+  this->points.push_back(a);
+  double sideA = Line::length(a, b) / std::sqrt(std::pow(ratio, 2) + 1);
+  double sideB = ratio * sideA;
+  this->bigger = std::max(sideA, sideB);
+  this->smaller = std::min(sideA, sideB);
+  this->points.push_back(Point(a.x + 0, a.y + this->smaller));
+  this->points.push_back(Point(a.x + this->bigger, a.y + this->smaller));
+  this->points.push_back(Point(a.x + this->bigger, a.y + 0));
+  this->print();
+  //TODO make a different method
+  Point realDiagonal = Point(b.x - a.x, b.y - a.y);
+  Point fakeDiagonal = Point(this->points[2].x - a.x, this->points[2].y - a.y);
+  std::cout << module(fakeDiagonal) << "         " << module(realDiagonal) << std::endl;
+  double curCos = cos(realDiagonal, fakeDiagonal);
+  double curSin = sin(fakeDiagonal, realDiagonal);
+  std::cout << curCos << "---------------" << curSin << std::endl;
+  for (size_t i = 1; i < 4; ++i) {
+	rotatePoint(a, curCos, curSin, this->points[i]);
+  }
 }
