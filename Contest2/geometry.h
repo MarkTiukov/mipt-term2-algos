@@ -1,20 +1,22 @@
 #include <vector>
 #include <cmath>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
-const double PI = 3.14159265358;
+const double PI = M_PI;
+const double MAX_VALUE = 9e18;
+const double PRECISION = 1e-9;
 
 struct Point {
   double x = 0;
   double y = 0;
 
-  Point() {}
-  Point(double x, double y) : x(x), y(y) {}
+  Point() { std::cerr << "in Point null constructor\n"; }
+  Point(double x, double y) : x(x), y(y) { /*std::cerr << "in Point constructor" << x << " " << y;*/ }
 };
 
 bool operator==(const Point &a, const Point &b) {
-  return a.x == b.x && a.y == b.y;
+  return std::abs(a.x - b.x) < PRECISION && std::abs(a.y - b.y) < PRECISION;
 }
 
 bool operator!=(const Point &a, const Point &b) {
@@ -30,25 +32,31 @@ bool operator<(const Point &a, const double &number) {
 }
 
 class Line {
-  std::vector<Point> points;
   double slope;
   double shift;
 
+  double a, b, c;
+
  public:
 
-  Line(double slope, double shift) : slope(slope), shift(shift) {}
+  Line(double slope, double shift) : slope(slope), shift(shift), a(slope), b(-1), c(b) {}
 
-  Line(Point point, double slope) : Line(slope, point.y - slope * point.x) { this->points.push_back(point); }
+  Line(Point point, double slope) : Line(slope, point.y - slope * point.x) {}
+
+  Line(double a, double b, double c) : a(a), b(b), c(c) {}
 
   Line(Point p1, Point p2) {
-	double tmp = (p2.y - p1.y) / (p2.x - p1.x);
-	this->slope = tmp;
-	this->shift = p1.y - p1.x * tmp;
+	if (p2.x != p1.x) {
+	  double tmp = (p2.y - p1.y) / (p2.x - p1.x);
+	  this->slope = tmp;
+	  this->shift = p1.y - p1.x * tmp;
+	} else {
+	  this->slope = MAX_VALUE;
+	  this->shift = p1.x;
+	}
+
   }
 
-  const std::vector<Point> &getPoints() const {
-	return points;
-  }
   double getSlope() const {
 	return slope;
   }
@@ -56,18 +64,46 @@ class Line {
 	return shift;
   }
 
+  double getA() const {
+	return a;
+  }
+  double getB() const {
+	return b;
+  }
+  double getC() const {
+	return c;
+  }
+
   static double length(const Point &p1, const Point &p2) {
 	return std::sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
   }
 
   Line perpendicular(const Point &point) {
-	double k = -1.0 / this->slope;
+	double k = this->slope != MAX_VALUE ? -1.0 / this->slope : 0;
 	return Line(k, point.y - k * point.x);
   }
 
   Point intersection(const Line &another) const {
-	double x = (another.shift - this->shift) / (this->slope - another.slope);
-	return Point(x, this->slope * x + this->shift);
+	Point result;
+	if (std::abs(this->slope - MAX_VALUE) < PRECISION) {
+	  result = Point(this->shift, this->shift * another.slope + another.shift);
+	} else {
+	  if (std::abs(another.slope - MAX_VALUE) < PRECISION) {
+		result = Point(another.shift, another.shift * this->slope + this->shift);
+	  } else {
+		double x = (another.shift - this->shift) / (this->slope - another.slope);
+		result = Point(x, this->slope * x + this->shift);
+	  }
+	}
+	return result;
+  }
+
+  bool operator==(const Line &another) const {
+	return std::abs(this->slope - another.slope) < PRECISION;
+  }
+
+  bool operator!=(const Line &another) const {
+	return !(*this == another);
   }
 
 };
@@ -77,6 +113,7 @@ class Shape {
   virtual double perimeter() const = 0;
   virtual double area() const = 0;
   virtual bool operator==(const Shape &another) = 0;
+  virtual bool operator!=(const Shape &another) = 0;
   virtual bool isCongruentTo(const Shape &another) const = 0;
   virtual bool isSimilarTo(const Shape &another) const = 0;
   virtual bool containsPoint(const Point &point) const = 0;
@@ -84,6 +121,8 @@ class Shape {
   virtual void reflex(const Point &center) = 0;
   virtual void reflex(const Line &axis) = 0;
   virtual void scale(const Point &center, const double &coefficient) = 0;
+
+  virtual ~Shape() = default;
 
 };
 
@@ -96,21 +135,24 @@ double cross(const Point &a, const Point &b) {
 }
 
 double module(const Point &a) { // length of vector a
+  std::cerr << "in module\n";
   return std::sqrt(dot(a, a));
 }
 
 double cos(const Point &a, const Point &b) { // cos between vector a and vector b
+  //std::cerr << "COS ";
   return dot(a, b) / (module(a) * module(b));
 }
 
 double sin(const Point &a, const Point &b) { // sin between vector a and vector b
+  //std::cerr << "SIN ";
   return cross(a, b) / (module(a) * module(b));
 }
 
 int getSign(const double &number) {
   if (number > 0)
 	return 1;
-  if (number == 0)
+  if (std::abs(number) < PRECISION)
 	return 0;
   return -1;
 }
@@ -127,6 +169,7 @@ void rotatePoint(const Point &center, const double &curCos, const double &curSin
 }
 
 void rotatePoint(const Point &center, const double &angle, Point &point) {
+  std::cout << "rotatePoint172\n";
   double ang = toRad(angle);
   double curCos = cos(ang);
   double curSin = sin(ang);
@@ -146,7 +189,14 @@ class Polygon : public Shape {
   Polygon() {}
 
   template<class ...Points>
-  Polygon(Points &... points) : points{std::forward<Points>(points)...} { makeVectors(); }
+  Polygon(Points... points) : points{std::forward<Points>(points)...} {
+	makeVectors();
+	std::cerr << "started\n";
+	/*for (auto p: this->points) {
+	  std::cerr << p.x << " " << p.y << "|||";
+	}*/
+  }
+
   Polygon(const std::vector<Point> &points) : points(points) { makeVectors(); }
 
   void makeVectors();
@@ -161,6 +211,7 @@ class Polygon : public Shape {
   std::vector<Point> getVertices() { return this->points; }
   bool isConvex() const;
   bool operator==(const Shape &another) override;
+  bool operator!=(const Shape &another) override;
   void print() const;
   void print(int precision) const;
   size_t size() const { return this->points.size(); }
@@ -168,6 +219,8 @@ class Polygon : public Shape {
   void reflex(const Point &center) override;
   void reflex(const Line &axis) override;
   void scale(const Point &center, const double &coefficient) override;
+
+  virtual ~Polygon() {}
 
 };
 
@@ -180,7 +233,10 @@ class Ellipse : public Shape {
 
  public:
 
+  Ellipse() { std::cerr << "in Ellipse null constructor\n"; }
+
   Ellipse(const Point &f_1, const Point &f_2, double a) : f1(f_1), f2(f_2), a(a / 2) {
+	std::cerr << "in ellipse constructor\n";
 	this->c = Line::length(f1, f2) / 2;
 	this->b = std::sqrt(this->a * this->a - this->c * this->c);
   }
@@ -196,7 +252,7 @@ class Ellipse : public Shape {
   bool operator==(const Shape &another) override {
 	try {
 	  const Ellipse &another2 = dynamic_cast<const Ellipse &>(another);
-	  return this->a == another2.a
+	  return std::abs(this->a - another2.a) < PRECISION
 		  && ((this->f1 == another2.f1 && this->f2 == another2.f2)
 			  || (this->f1 == another2.f2 && this->f2 == another2.f1));
 	} catch (...) {
@@ -204,10 +260,14 @@ class Ellipse : public Shape {
 	}
   }
 
+  bool operator!=(const Shape &another) override {
+	return *this != another;
+  }
+
   bool isCongruentTo(const Shape &another) const override {
 	try {
 	  const Ellipse &another2 = dynamic_cast<const Ellipse &>(another);
-	  return this->c == another2.c && this->a == another2.a;
+	  return std::abs(this->c - another2.c) < PRECISION && std::abs(this->a - another2.a) < PRECISION;
 	} catch (...) {
 	  return false;
 	}
@@ -237,6 +297,7 @@ class Ellipse : public Shape {
   }
 
   void reflex(const Line &axis) override {
+	//TODO rewrite for infinity
 	double denominator = 1 + axis.getSlope() * axis.getSlope();
 	double slope = axis.getSlope();
 	double shift = axis.getShift();
@@ -261,10 +322,14 @@ class Ellipse : public Shape {
 
   Point center() const { return Point((this->f1.x + this->f2.x) / 2, (this->f1.y + this->f2.y) / 2); }
 
+  virtual ~Ellipse() {}
+
 };
 
 class Circle : public Ellipse {
  public:
+
+  Circle() {}
   Circle(Point center, double radius) : Ellipse(center, center, radius * 2) {}
 
   double radius() const { return this->a; }
@@ -288,6 +353,7 @@ class Circle : public Ellipse {
   }
 
   void reflex(const Line &axis) override {
+	//TODO rewrite for infinity
 	double denominator = 1 + axis.getSlope() * axis.getSlope();
 	double slope = axis.getSlope();
 	double shift = axis.getShift();
@@ -303,6 +369,9 @@ class Circle : public Ellipse {
 	this->f1.y = coefficient * (this->f1.y - center.y) + center.y;
 	this->f2 = this->f1;
   }
+
+  virtual ~Circle() {}
+
 };
 
 class Rectangle : public Polygon {
@@ -313,9 +382,11 @@ class Rectangle : public Polygon {
 
  public:
 
+  Rectangle() { std::cerr << "default rect"; }
   Rectangle(Point a, Point b, double ratio);
 
   Rectangle(Point a, Point b, Point c, Point d) : Polygon(a, b, c, d) {
+	std::cerr << "in Rectangle constructor\n";
 	double one = module(this->vectors[0]);
 	double two = module(this->vectors[1]);
 	this->bigger = std::max(one, two);
@@ -325,11 +396,14 @@ class Rectangle : public Polygon {
   Point center() const;
   std::pair<Line, Line> diagonals() const;
 
+  virtual ~Rectangle() {}
+
 };
 
 class Square : public Rectangle {
  public:
 
+  Square() { std::cerr << "sq"; }
   Square(Point a, Point b, Point c, Point d) : Rectangle(a, b, c, d) {}
   Square(Point a, Point b) : Rectangle(a, b, 1) {}
 
@@ -337,6 +411,8 @@ class Square : public Rectangle {
   bool isSimilarTo(const Square &square) { return true; }
   Circle circumscribedCircle() const { return Circle(this->center(), std::sqrt(2 * std::pow(this->bigger / 2, 2))); }
   Circle inscribedCircle() const { return Circle(this->center(), this->bigger / 2); }
+
+  virtual ~Square() {}
 
 };
 
@@ -346,7 +422,10 @@ class Triangle : public Polygon {
 
  public:
 
+  Triangle() {}
+
   Triangle(Point a, Point b, Point c) : Polygon(a, b, c) {
+	std::cerr << "in Triangle constructor\n";
 	this->sideOne = module(this->vectors[0]);
 	this->sideTwo = module(this->vectors[1]);
 	this->sideThree = module(this->vectors[2]);
@@ -381,6 +460,8 @@ class Triangle : public Polygon {
   Point orthocenter() const;
   Line EulerLine() const;
   Circle ninePointsCircle() const;
+
+  virtual ~Triangle() {}
 
 };
 
@@ -426,8 +507,10 @@ bool Polygon::operator==(const Shape &another) {
 	  bool result1 = (this->points[shift] - copyAnother.points[0] < 1e-9);
 	  bool result2 = result1;
 	  for (size_t i = 0; i < length && (result1 || result2); ++i) {
-		result1 = result1 && this->points[(shift + i) % length] == copyAnother.points[i]; // for one direction
-		result2 = result2 && this->points[(length + shift - i) % length] == copyAnother.points[i]; // for another
+		result1 =
+			result1 && this->points[(shift + i) % length] == copyAnother.points[i]; // for one direction
+		result2 =
+			result2 && this->points[(length + shift - i) % length] == copyAnother.points[i]; // for another
 	  }
 	  result = result1 || result2;
 	}
@@ -444,6 +527,7 @@ void Polygon::makeVectors() {
 }
 
 bool Polygon::isSimilarTo(const Shape &another) const {
+  std::cerr << "isSimilarTo\n";
   try {
 	const Polygon &copyAnother = dynamic_cast<const Polygon &>(another);
 	bool result = false;
@@ -451,17 +535,19 @@ bool Polygon::isSimilarTo(const Shape &another) const {
 	  int length = this->points.size();
 	  for (int shift = 0; shift < length; ++shift) {
 		bool
-			result1 = cos(this->vectors[shift], this->vectors[(shift + 1) % length])
-			== cos(copyAnother.vectors[0], copyAnother.vectors[1]);
+			result1 = std::abs(cos(this->vectors[shift], this->vectors[(shift + 1) % length])
+								   - cos(copyAnother.vectors[0], copyAnother.vectors[1])) < PRECISION;
 		bool result2 = result1;
 		for (int i = 0; i < length && (result1 || result2); ++i) {
 		  result1 = result1 &&
-			  cos(this->vectors[(shift + i) % length], this->vectors[(shift + i + 1) % length]) ==
-				  cos(copyAnother.vectors[i], copyAnother.vectors[(i + 1) % length]); // for one direction
+			  std::abs(cos(this->vectors[(shift + i) % length], this->vectors[(shift + i + 1) % length]) -
+				  cos(copyAnother.vectors[i], copyAnother.vectors[(i + 1) % length])) < PRECISION; // for one direction
 		  result2 = result2 &&
-			  cos(this->vectors[(length + shift - i) % length], this->vectors[(length + shift - i + 1) % length])
-				  ==
-					  cos(copyAnother.vectors[i], copyAnother.vectors[(i + 1) % length]); // for another
+			  std::abs(
+				  cos(this->vectors[(length + shift - i) % length], this->vectors[(length + shift - i + 1) % length])
+					  -
+						  cos(copyAnother.vectors[i], copyAnother.vectors[(i + 1) % length]))
+				  < PRECISION; // for another
 		}
 		result = result || result1 || result2;
 	  }
@@ -476,6 +562,7 @@ const std::vector<Point> &Polygon::getPoints() const {
 }
 
 bool Polygon::isCongruentTo(const Shape &another) const {
+  std::cerr << "CONGRUENT";
   try {
 	const Polygon &copyAnother = dynamic_cast<const Polygon &>(another);
 	bool result = false;
@@ -484,13 +571,15 @@ bool Polygon::isCongruentTo(const Shape &another) const {
 		size_t length = this->points.size();
 		for (size_t shift = 0; shift < length; ++shift) {
 		  bool result1;
-		  result1 = module(this->vectors[shift]) == module(copyAnother.vectors[0]);
+		  result1 = std::abs(module(this->vectors[shift]) - module(copyAnother.vectors[0])) < PRECISION;
 		  bool result2 = result1;
 		  for (size_t i = 0; i < length && (result1 || result2); ++i) {
 			result1 = result1 &&
-				module(this->vectors[(shift + i) % length]) == module(copyAnother.vectors[i]); // for one direction
+				std::abs(module(this->vectors[(shift + i) % length]) - module(copyAnother.vectors[i]))
+					< PRECISION; // for one direction
 			result2 = result2 &&
-				module(this->vectors[(length + shift - i) % length]) == module(copyAnother.vectors[i]); // for another
+				std::abs(module(this->vectors[(length + shift - i) % length]) - module(copyAnother.vectors[i]))
+					< PRECISION; // for another
 		  }
 		  result = result || result1 || result2;
 		}
@@ -503,6 +592,7 @@ bool Polygon::isCongruentTo(const Shape &another) const {
 }
 
 bool Polygon::containsPoint(const Point &point) const {
+  std::cerr << "containsPoint -- " << point.x << " " << point.y << "\n";
   bool result = true;
   int sign = getSign(cross(this->vectors[0], Point(point.x - this->points[0].x, point.y - this->points[0].y)));
   if (sign == 0)
@@ -545,6 +635,7 @@ void Polygon::reflex(const Point &center) {
 }
 
 void Polygon::reflex(const Line &axis) {
+  //TODO rewrite for infinity
   double denominator = 1 + axis.getSlope() * axis.getSlope();
   double slope = axis.getSlope();
   double shift = axis.getShift();
@@ -568,6 +659,7 @@ void Polygon::scale(const Point &center, const double &coefficient) {
 }
 
 Rectangle::Rectangle(Point a, Point b, double ratio) {
+  std::cerr << "rectagle constructor\n";
   this->points.push_back(a);
   double sideA = Line::length(a, b) / std::sqrt(std::pow(ratio, 2) + 1);
   double sideB = ratio * sideA;
@@ -576,14 +668,11 @@ Rectangle::Rectangle(Point a, Point b, double ratio) {
   this->points.push_back(Point(a.x + 0, a.y + this->smaller));
   this->points.push_back(Point(a.x + this->bigger, a.y + this->smaller));
   this->points.push_back(Point(a.x + this->bigger, a.y + 0));
-  this->print();
   //TODO make a different method
   Point realDiagonal = Point(b.x - a.x, b.y - a.y);
   Point fakeDiagonal = Point(this->points[2].x - a.x, this->points[2].y - a.y);
-  std::cout << module(fakeDiagonal) << "         " << module(realDiagonal) << std::endl;
   double curCos = cos(realDiagonal, fakeDiagonal);
   double curSin = sin(fakeDiagonal, realDiagonal);
-  std::cout << curCos << "---------------" << curSin << std::endl;
   for (size_t i = 1; i < 4; ++i) {
 	rotatePoint(a, curCos, curSin, this->points[i]);
   }
@@ -616,4 +705,8 @@ Circle Triangle::ninePointsCircle() const {
   Point orth = this->orthocenter();
   Point cen = this->centroid();
   return Circle(Point((orth.x + cen.x) / 2, (orth.x + orth.y) / 2), this->circumscribedCircle().radius());
+}
+
+bool Polygon::operator!=(const Shape &another) {
+  return *this == another;
 }
