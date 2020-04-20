@@ -1,14 +1,13 @@
 #include <iostream>
 #include "geometry.h"
+//#include "test.h"
 #include <vector>
 #include <cmath>
 #include <iomanip>
 
 int main() {
-  Point(-2, 2);
-  Point(1, 2);
-  Point(3, -1);
-  Polygon();
-  std::cout << "ok";
+  Triangle p(Point(2, 2), Point(-1, -2), Point(-2, 2));
+  Line line = p.EulerLine();
+  std::cout << line.getSlope() << " " << line.getShift();
 }
 
