@@ -39,10 +39,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = "/Users/marktiukov/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/201.6668.126/CLion.app/Contents/bin/cmake/mac/bin/cmake"
+CMAKE_COMMAND = "/Users/marktiukov/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/201.7223.86/CLion.app/Contents/bin/cmake/mac/bin/cmake"
 
 # The command to remove a file.
-RM = "/Users/marktiukov/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/201.6668.126/CLion.app/Contents/bin/cmake/mac/bin/cmake" -E remove -f
+RM = "/Users/marktiukov/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/201.7223.86/CLion.app/Contents/bin/cmake/mac/bin/cmake" -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /Users/marktiukov/CLionProjects/mipt-term2-algos/Contest3/cma
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	"/Users/marktiukov/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/201.6668.126/CLion.app/Contents/bin/cmake/mac/bin/cmake" -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	"/Users/marktiukov/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/201.7223.86/CLion.app/Contents/bin/cmake/mac/bin/cmake" -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -70,7 +70,7 @@ rebuild_cache/fast: rebuild_cache
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	"/Users/marktiukov/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/201.6668.126/CLion.app/Contents/bin/cmake/mac/bin/cmake" -E echo No\ interactive\ CMake\ dialog\ available.
+	"/Users/marktiukov/Library/Application Support/JetBrains/Toolbox/apps/CLion/ch-0/201.7223.86/CLion.app/Contents/bin/cmake/mac/bin/cmake" -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -111,6 +111,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named Task2
+
+# Build rule for target.
+Task2: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Task2
+.PHONY : Task2
+
+# fast build rule for target.
+Task2/fast:
+	$(MAKE) -f CMakeFiles/Task2.dir/build.make CMakeFiles/Task2.dir/build
+.PHONY : Task2/fast
+
+#=============================================================================
 # Target rules for targets named Contest3
 
 # Build rule for target.
@@ -122,6 +135,33 @@ Contest3: cmake_check_build_system
 Contest3/fast:
 	$(MAKE) -f CMakeFiles/Contest3.dir/build.make CMakeFiles/Contest3.dir/build
 .PHONY : Contest3/fast
+
+Task2.o: Task2.cpp.o
+
+.PHONY : Task2.o
+
+# target to build an object file
+Task2.cpp.o:
+	$(MAKE) -f CMakeFiles/Task2.dir/build.make CMakeFiles/Task2.dir/Task2.cpp.o
+.PHONY : Task2.cpp.o
+
+Task2.i: Task2.cpp.i
+
+.PHONY : Task2.i
+
+# target to preprocess a source file
+Task2.cpp.i:
+	$(MAKE) -f CMakeFiles/Task2.dir/build.make CMakeFiles/Task2.dir/Task2.cpp.i
+.PHONY : Task2.cpp.i
+
+Task2.s: Task2.cpp.s
+
+.PHONY : Task2.s
+
+# target to generate assembly for a file
+Task2.cpp.s:
+	$(MAKE) -f CMakeFiles/Task2.dir/build.make CMakeFiles/Task2.dir/Task2.cpp.s
+.PHONY : Task2.cpp.s
 
 main.o: main.cpp.o
 
@@ -158,7 +198,11 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
+	@echo "... Task2"
 	@echo "... Contest3"
+	@echo "... Task2.o"
+	@echo "... Task2.i"
+	@echo "... Task2.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
