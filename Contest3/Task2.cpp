@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <algorithm>
 
 const int MY_INT_MAX = 2147483647;
 
@@ -41,7 +42,8 @@ class MyComparator {
   }
 };
 
-int minOstWeight(const Graph &graph, int n);
+int minOstWeight(const std::vector<Edge> &sorted_edges, int n);
+bool makesCycle(std::vector<int> &trees, const Edge &edge);
 
 int main() {
   int n, m;
@@ -56,13 +58,35 @@ int main() {
 	my_graph.add(to, from, weight);
   }
   std::sort(edges.begin(), edges.end(), MyComparator());
-  for (auto edge: edges) {
+  /*for (auto edge: edges) {
 	std::cout << edge.start << " " << edge.end << " " << edge.weight << std::endl;
-  }
-  //std::cout << minOstWeight(my_graph, n);
+  }*/
+  std::cout << minOstWeight(edges, n);
 }
 
-int minOstWeight(const Graph &graph, int n) {
+int minOstWeight(const std::vector<Edge> &sorted_edges, int n) {
   int result = 0;
+  std::vector<int> trees = std::vector<int>(n);
+  for (int i = 0; i < n; ++i) {
+	trees[i] = i;
+  }
+  for (int i = 0, counter = 0; counter < n - 1; ++i, ++counter) {
+	if (!makesCycle(trees, sorted_edges[i])) {
+	  result += sorted_edges[i].weight;
+	  int change_from = sorted_edges[i].start;
+	  int change_to = sorted_edges[i].end;
+	  for (int vertex = 0; vertex < n; ++vertex) {
+		if (trees[vertex] == change_from)
+		  trees[vertex] = change_to;
+	  }
+	} else {
+	  --counter;
+	}
+  }
   return result;
 }
+
+bool makesCycle(std::vector<int> &trees, const Edge &edge) {
+  return trees[edge.start] == trees[edge.end];
+}
+
