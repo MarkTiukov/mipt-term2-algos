@@ -72,9 +72,10 @@ int minOstWeight(const std::vector<Edge> &sorted_edges, int n) {
   }
   for (int i = 0, counter = 0; counter < n - 1; ++i, ++counter) {
 	if (!makesCycle(trees, sorted_edges[i])) {
+	  // std::cout << sorted_edges[i].start + 1 << " " << sorted_edges[i].end + 1 << std::endl;
 	  result += sorted_edges[i].weight;
-	  int change_from = sorted_edges[i].start;
-	  int change_to = sorted_edges[i].end;
+	  int change_from = trees[sorted_edges[i].start];
+	  int change_to = trees[sorted_edges[i].end];
 	  for (int vertex = 0; vertex < n; ++vertex) {
 		if (trees[vertex] == change_from)
 		  trees[vertex] = change_to;
