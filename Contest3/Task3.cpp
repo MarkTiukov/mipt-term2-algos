@@ -5,7 +5,7 @@
 const long long MY_LONG_MAX = 9e18;
 
 struct Graph {
-  std::vector<std::vector<std::pair<int, long long>>> graph;
+  std::vector<std::vector<std::pair<long long, long long>>> graph;
 
   Graph(long long n) : graph(n) {}
 
@@ -15,7 +15,7 @@ struct Graph {
   }
 
   void print() {
-	for (int from = 0; from < this->graph.size(); ++from) {
+	for (long long from = 0; from < this->graph.size(); ++from) {
 	  for (std::pair<long long, long long> pair: this->graph[from]) {
 		std::cout << "from " << from << " to " << pair.first << " with weight " << pair.second << std::endl;
 	  }
@@ -40,7 +40,7 @@ class myComparator {
   }
 };
 
-int minOstWeight(const Graph &graph,
+long long minOstWeight(const Graph &graph,
 				 std::priority_queue<Node, std::vector<Node>, myComparator> &queue,
 				 std::vector<long long> dist,
 				 long long n);
@@ -56,7 +56,7 @@ int main() {
   for (long long i = 0; i < n; ++i) {
 	std::cin >> a[i];
   }
-  int min = 0;
+  long long min = 0;
   for (long long i = 0; i < n; ++i) {
 	if (a[i] < a[min]) {
 	  min = i;
@@ -93,13 +93,13 @@ int main() {
 	  min_distances[to] = std::min(min_distances[to], std::min(weight, a[from] + a[to]));
 	}
   }
-  for (int i = 1; i < n; ++i) {
+  for (long long i = 1; i < n; ++i) {
 	queue.emplace(Node(i, min_distances[i]));
   }
   std::cout << minOstWeight(my_graph, queue, min_distances, n);
 }
 
-int minOstWeight(const Graph &graph,
+long long minOstWeight(const Graph &graph,
 				 std::priority_queue<Node, std::vector<Node>, myComparator> &queue,
 				 std::vector<long long> dist,
 				 long long n) {
