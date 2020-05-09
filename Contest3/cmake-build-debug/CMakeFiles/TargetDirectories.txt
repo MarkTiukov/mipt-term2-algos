@@ -1,3 +1,4 @@
 /Users/marktiukov/CLionProjects/mipt-term2-algos/Contest3/cmake-build-debug/CMakeFiles/rebuild_cache.dir
 /Users/marktiukov/CLionProjects/mipt-term2-algos/Contest3/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/marktiukov/CLionProjects/mipt-term2-algos/Contest3/cmake-build-debug/CMakeFiles/Task5.dir
 /Users/marktiukov/CLionProjects/mipt-term2-algos/Contest3/cmake-build-debug/CMakeFiles/Contest3.dir
