@@ -33,7 +33,7 @@ struct Node {
   Node(int number, int distance) : number(number), distance(distance) {}
 };
 
-class myComparator {
+class MyComparator {
  public:
   int operator()(const Node &a, const Node &b) {
 	return a.distance > b.distance;
@@ -41,7 +41,7 @@ class myComparator {
 };
 
 int minOstWeight(const Graph &graph,
-				 std::priority_queue<Node, std::vector<Node>, myComparator> &queue,
+				 std::priority_queue<Node, std::vector<Node>, MyComparator> &queue,
 				 std::vector<int> dist,
 				 int n);
 
@@ -49,7 +49,7 @@ int main() {
   int n, m;
   std::cin >> n >> m;
   Graph my_graph = Graph(n);
-  std::priority_queue<Node, std::vector<Node>, myComparator> queue;
+  std::priority_queue<Node, std::vector<Node>, MyComparator> queue;
   std::vector<int> min_distances(n, MY_INT_MAX);
   min_distances[0] = 0;
   for (int i = 0; i < m; ++i) {
@@ -70,7 +70,7 @@ int main() {
 }
 
 int minOstWeight(const Graph &graph,
-				 std::priority_queue<Node, std::vector<Node>, myComparator> &queue,
+				 std::priority_queue<Node, std::vector<Node>, MyComparator> &queue,
 				 std::vector<int> dist,
 				 int n) {
   int result = 0;
