@@ -58,9 +58,6 @@ int main() {
 	my_graph.add(to, from, weight);
   }
   std::sort(edges.begin(), edges.end(), MyComparator());
-  /*for (auto edge: edges) {
-	std::cout << edge.start << " " << edge.end << " " << edge.weight << std::endl;
-  }*/
   std::cout << minOstWeight(edges, n);
 }
 
@@ -72,7 +69,6 @@ int minOstWeight(const std::vector<Edge> &sorted_edges, int n) {
   }
   for (int i = 0, counter = 0; counter < n - 1; ++i, ++counter) {
 	if (!makesCycle(trees, sorted_edges[i])) {
-	  // std::cout << sorted_edges[i].start + 1 << " " << sorted_edges[i].end + 1 << std::endl;
 	  result += sorted_edges[i].weight;
 	  int change_from = trees[sorted_edges[i].start];
 	  int change_to = trees[sorted_edges[i].end];
