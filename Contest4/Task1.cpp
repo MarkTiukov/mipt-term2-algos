@@ -3,13 +3,11 @@
 
 const int MY_INT_MAX = 2147483647;
 
-std::vector<int> logarithms;
-
 struct SparseTable {
 
   std::vector<std::vector<int>> table;
 
-  SparseTable(int n, const std::vector<int> &numbers) {
+  SparseTable(int n, const std::vector<int> &numbers, const std::vector<int> &logarithms) {
 	this->table = std::vector<std::vector<int>>(n);
 	for (int i = 0; i < n; ++i) {
 	  this->table[i] = std::vector<int>(logarithms[n] + 1);
@@ -39,7 +37,7 @@ struct SparseTable {
 
 };
 
-int getMin(const SparseTable &data, const std::vector<int> &numbers, const int &start, const int &end) {
+int getMin(const SparseTable &data, const std::vector<int> &numbers, const std::vector<int> &logarithms, const int &start, const int &end) {
   int result = 0;
   if (start == end) {
 	result = start;
@@ -58,7 +56,7 @@ int main() {
   int n, m;
   std::cin >> n >> m;
   std::vector<int> numbers = std::vector<int>(n + 1);
-  logarithms = std::vector<int>(n + 1);
+  std::vector<int> logarithms = std::vector<int>(n + 1);
   for (int i = 2; i <= n; i++) {
 	logarithms[i] = logarithms[i >> 1] + 1;
   }
@@ -66,13 +64,13 @@ int main() {
 	std::cin >> numbers[i];
   }
   numbers[n] = MY_INT_MAX;
-  SparseTable data = SparseTable(n, numbers);
+  SparseTable data = SparseTable(n, numbers, logarithms);
   for (int i = 0; i < m; ++i) {
 	int start, end;
 	std::cin >> start >> end;
-	int min_position = getMin(data, numbers, --start, --end);
-	int min_position_left_side = getMin(data, numbers, start, min_position - 1);
-	int min_position_right_side = getMin(data, numbers, min_position + 1, end);
+	int min_position = getMin(data, numbers, logarithms, --start, --end);
+	int min_position_left_side = getMin(data, numbers, logarithms, start, min_position - 1);
+	int min_position_right_side = getMin(data, numbers, logarithms, min_position + 1, end);
 	std::cout << std::min(numbers[min_position_left_side], numbers[min_position_right_side]) << std::endl;
   }
 }
