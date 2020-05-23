@@ -40,6 +40,9 @@ class List {
 
 	ConstIterator operator++();
 	ConstIterator operator--();
+
+	typename ConstIterator::reference operator*() const;
+
   };
 
  public:
@@ -163,4 +166,9 @@ template<typename T>
 typename List<T>::ConstIterator List<T>::ConstIterator::operator--() {
   this->iter_ = this->iter_->previous;
   return *this;
+}
+
+template<typename T>
+typename List<T>::ConstIterator::reference List<T>::ConstIterator::operator*() const {
+  return this->iter_->value;
 }
