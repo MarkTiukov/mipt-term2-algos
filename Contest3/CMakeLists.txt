@@ -20,3 +20,7 @@ endif()
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Task4.cpp)
     add_executable(Task4 ${CMAKE_CURRENT_SOURCE_DIR}/Task4.cpp)
 endif()
+
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/list.h)
+    add_executable(List ${CMAKE_CURRENT_SOURCE_DIR}/list_test.cpp)
+endif()
