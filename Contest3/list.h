@@ -12,9 +12,9 @@ class List {
 
 	Node() = default;
 
-	Node(T& value) : value(std::move(value)) {}
-	Node(T& value, Node* previous) : value(std::move(value)), previous(previous) {}
-	Node(T& value, Node* previous, Node* next) : Node(std::move(value), previous), next(next) {}
+	Node(const T& value) : value(value) {}
+	Node(const T& value, Node* previous) : value(value), previous(previous) {}
+	Node(const T& value, Node* previous, Node* next) : Node(value, previous), next(next) {}
 
 	Node(T&& value) : value(std::move(value)) {}
 	Node(T&& value, Node* previous) : value(std::move(value)), previous(previous) {}
@@ -40,7 +40,6 @@ class List {
 	bool operator==(const Iterator<IsConst>& rhs) const { return this->iter_ == rhs.iter_; }
 	bool operator!=(const Iterator<IsConst>& rhs) const { return !(rhs == *this); }
 
-	//TODO доделать декремент и инкремент
 	Iterator operator++();
 	Iterator operator--();
 
@@ -81,6 +80,9 @@ class List {
 
   void erase(Iterator<true> it);
   void erase(Iterator<true> first, Iterator<true> last);
+
+  void push_back(const T& element);
+  void push_back(T&& element);
 
   virtual ~List();
 
@@ -183,7 +185,10 @@ typename List<T>::template Iterator<IsConst> List<T>::Iterator<IsConst>::operato
 template<typename T>
 template<bool IsConst>
 typename List<T>::template Iterator<IsConst> List<T>::Iterator<IsConst>::operator--() {
-  this->iter_ = this->iter_->previous;
+  if (this->iter_ == nullptr)
+	this->iter_ = List<T>::last_;
+  else
+	this->iter_ = this->iter_->previous;
   return *this;
 }
 
@@ -191,20 +196,28 @@ template<typename T>
 void List<T>::insert(List::Iterator<true> it, const T& element) {
   Node* insertion = new Node(element);
   insertion->previous = it.iter_->previous;
-  if (it.iter_->previous != nullptr)
+  if (it.iter_->previous != nullptr) {
 	it.iter_->previous->next = insertion;
+  } else {
+	this->first_ = it.iter_;
+  }
   insertion->next = it.iter_;
   it.iter_->previous = insertion;
+  ++(this->size_);
 }
 
 template<typename T>
 void List<T>::insert(List::Iterator<true> it, T&& element) {
   Node* insertion = new Node(std::move(element));
   insertion->previous = it.iter_->previous;
-  if (it.iter_->previous != nullptr)
+  if (it.iter_->previous != nullptr) {
 	it.iter_->previous->next = insertion;
+  } else {
+	this->first_ = it.iter_;
+  }
   insertion->next = it.iter_;
   it.iter_->previous = insertion;
+  ++(this->size_);
 }
 
 template<typename T>
@@ -222,8 +235,11 @@ void List<T>::erase(List::Iterator<true> it) {
   }
   if (it.iter_->next != nullptr) {
 	it.iter_->next = it.iter_->previous;
+  } else {
+	this->last_ = it.iter_->previous;
   }
   delete it.iter_;
+  --(this->size_);
 }
 
 template<typename T>
@@ -235,4 +251,30 @@ void List<T>::erase(List::Iterator<true> first, List::Iterator<true> last) {
 	it = first;
   }
   this->erase(it);
+}
+
+template<typename T>
+void List<T>::push_back(const T& element) {
+  Node* new_node = new Node(element);
+  if (size_ > 0) {
+	this->last_->next = new_node;
+	new_node->previous = this->last_;
+  } else {
+	this->first_ = new_node;
+  }
+  this->last_ = new_node;
+  ++(this->size_);
+}
+
+template<typename T>
+void List<T>::push_back(T&& element) {
+  Node* new_node = new Node(std::move(element));
+  if (size_ > 0) {
+	this->last_->next = new_node;
+	new_node->previous = this->last_;
+  } else {
+	this->first_ = new_node;
+  }
+  this->last_ = new_node;
+  ++(this->size_);
 }
