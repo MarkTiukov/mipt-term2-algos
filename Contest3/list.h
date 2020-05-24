@@ -1,5 +1,6 @@
 #include <utility>
 #include <iterator>
+#include <type_traits>
 
 template<typename T>
 class List {
@@ -28,22 +29,22 @@ class List {
   Node* first_ = nullptr;
   Node* last_ = nullptr;
 
-  class ConstIterator : public std::iterator<std::bidirectional_iterator_tag, T> {
+  template<bool IsConst>
+  class Iterator : public std::iterator<std::bidirectional_iterator_tag, std::conditional_t<IsConst, const T, T>> {
    private:
 	Node* iter_;
    public:
-	ConstIterator() = default;
-	ConstIterator(Node* pointer) : iter_(pointer) {}
+	Iterator() = default;
+	Iterator(Node* pointer) : iter_(pointer) {}
 
-	bool operator==(const ConstIterator& rhs) const { return this->iter_ == rhs.iter_; }
-	bool operator!=(const ConstIterator& rhs) const { return !(rhs == *this); }
+	bool operator==(const Iterator<IsConst>& rhs) const { return this->iter_ == rhs.iter_; }
+	bool operator!=(const Iterator<IsConst>& rhs) const { return !(rhs == *this); }
 
-	ConstIterator operator++();
-	ConstIterator operator--();
+	//TODO доделать декремент и инкремент
+	Iterator operator++();
+	Iterator operator--();
 
-	typename ConstIterator::reference operator*() const;
-
-
+	typename Iterator::reference operator*() const { return this->iter_->value; }
 
   };
 
@@ -67,6 +68,19 @@ class List {
   T& back() { return this->last_->value; }
 
   bool empty() { return this->size_ == 0; }
+
+  Iterator<false> begin() { return Iterator<false>(this->first_); }
+  Iterator<false> end() { return Iterator<false>(nullptr); }
+
+  Iterator<true> cbegin() { return Iterator<true>(this->first_); }
+  Iterator<true> cend() { return Iterator<true>(nullptr); }
+
+  void insert(Iterator<true> it, const T& element);
+  void insert(Iterator<true> it, T&& element);
+  void insert(Iterator<true> it, Iterator<true> first, Iterator<true> last);
+
+  void erase(Iterator<true> it);
+  void erase(Iterator<true> first, Iterator<true> last);
 
   virtual ~List();
 
@@ -158,19 +172,67 @@ List<T>& List<T>::operator=(const List&& rhs) {
   }
   return *this;
 }
+
 template<typename T>
-typename List<T>::ConstIterator List<T>::ConstIterator::operator++() {
+template<bool IsConst>
+typename List<T>::template Iterator<IsConst> List<T>::Iterator<IsConst>::operator++() {
   this->iter_ = this->iter_->next;
   return *this;
 }
 
 template<typename T>
-typename List<T>::ConstIterator List<T>::ConstIterator::operator--() {
+template<bool IsConst>
+typename List<T>::template Iterator<IsConst> List<T>::Iterator<IsConst>::operator--() {
   this->iter_ = this->iter_->previous;
   return *this;
 }
 
 template<typename T>
-typename List<T>::ConstIterator::reference List<T>::ConstIterator::operator*() const {
-  return this->iter_->value;
+void List<T>::insert(List::Iterator<true> it, const T& element) {
+  Node* insertion = new Node(element);
+  insertion->previous = it.iter_->previous;
+  if (it.iter_->previous != nullptr)
+	it.iter_->previous->next = insertion;
+  insertion->next = it.iter_;
+  it.iter_->previous = insertion;
+}
+
+template<typename T>
+void List<T>::insert(List::Iterator<true> it, T&& element) {
+  Node* insertion = new Node(std::move(element));
+  insertion->previous = it.iter_->previous;
+  if (it.iter_->previous != nullptr)
+	it.iter_->previous->next = insertion;
+  insertion->next = it.iter_;
+  it.iter_->previous = insertion;
+}
+
+template<typename T>
+void List<T>::insert(List::Iterator<true> it, List::Iterator<true> first, List::Iterator<true> last) {
+  while (first != last) {
+	this->insert(it, first->value);
+  }
+  this->insert(it, first->value);
+}
+
+template<typename T>
+void List<T>::erase(List::Iterator<true> it) {
+  if (it.iter_->previous != nullptr) {
+	it.iter_->previous = it.iter_->next;
+  }
+  if (it.iter_->next != nullptr) {
+	it.iter_->next = it.iter_->previous;
+  }
+  delete it.iter_;
+}
+
+template<typename T>
+void List<T>::erase(List::Iterator<true> first, List::Iterator<true> last) {
+  Iterator<true> it = first.iter_;
+  while (first != last) {
+	first++;
+	this->erase(it);
+	it = first;
+  }
+  this->erase(it);
 }
