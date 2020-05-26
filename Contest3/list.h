@@ -7,8 +7,8 @@ class List {
  public:
   struct Node {
 	T value;
-	Node* next = nullptr;
-	Node* previous = nullptr;
+	Node* next;
+	Node* previous;
 
 	Node() = default;
 
@@ -29,14 +29,25 @@ class List {
 	template<typename... Args>
 	Node(Node* previous, Node* next, Args&& ... args) : value(std::forward<Args>(args)...), previous(previous), next(next) {}
 
+	Node& operator=(Node& rhs) {
+	  this->value = rhs.value;
+	  this->previous = rhs.previous;
+	  this->next = rhs.next;
+	}
+	Node& operator=(Node&& rhs) {
+	  this->value = std::move(rhs.value);
+	  this->previous = rhs.previous;
+	  this->next = rhs.next;
+	}
+
 	bool operator==(const Node& rhs) const { return this->value == rhs.value; }
 	bool operator!=(const Node& rhs) const { return !(rhs == *this); }
 
   };
  private:
   size_t size_ = 0;
-  Node* first_ = nullptr;
-  Node* last_ = nullptr;
+  Node* first_;
+  Node* last_;
 
   template<bool IsConst = true>
   class Iterator : public std::iterator<std::bidirectional_iterator_tag, std::conditional_t<IsConst, const T, T>> {
@@ -48,17 +59,18 @@ class List {
 	Iterator() = default;
 	//Iterator(Node* pointer) : iter_(pointer), last() {}
 	Iterator(Node* pointer, Node* last) : iter_(pointer), last(*last) {}
-	Iterator(const Iterator<false>& it) : iter_(it.iter_), last(it.last) {}
-	Iterator(const Iterator<true>& it) : iter_(it.iter_), last(it.last) {}
+	Iterator(const Iterator<false>& it) : last(it.last) { *this = it;}
+	Iterator(const Iterator<true>& it) : last(it.last) { *this = it; }
 
-	Iterator& operator=(const Iterator<false>& rhs) {
+	Iterator& operator=(const Iterator<!IsConst>& rhs) {
 	  if (*this != rhs) {
 		this->iter_ = rhs.iter_;
 		this->last = rhs.last;
 		return *this;
 	  }
 	}
-	Iterator& operator=(const Iterator<true>& rhs) {
+
+	Iterator& operator=(const Iterator& rhs) {
 	  if (*this != rhs) {
 		this->iter_ = rhs.iter_;
 		this->last = rhs.last;
