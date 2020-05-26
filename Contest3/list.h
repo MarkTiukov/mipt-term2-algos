@@ -40,14 +40,31 @@ class List {
 
   template<bool IsConst = true>
   class Iterator : public std::iterator<std::bidirectional_iterator_tag, std::conditional_t<IsConst, const T, T>> {
-    friend List;
+	friend List;
    private:
 	Node* iter_;
+	Node& last;
    public:
 	Iterator() = default;
-	Iterator(Node* pointer) : iter_(pointer) {}
-	Iterator(const Iterator<false>& it) : iter_(it.iter_) {}
-	Iterator(const Iterator<true>& it) : iter_(it.iter_) {}
+	//Iterator(Node* pointer) : iter_(pointer), last() {}
+	Iterator(Node* pointer, Node* last) : iter_(pointer), last(*last) {}
+	Iterator(const Iterator<false>& it) : iter_(it.iter_), last(it.last) {}
+	Iterator(const Iterator<true>& it) : iter_(it.iter_), last(it.last) {}
+
+	Iterator& operator=(const Iterator<false>& rhs) {
+	  if (*this != rhs) {
+		this->iter_ = rhs.iter_;
+		this->last = rhs.last;
+		return *this;
+	  }
+	}
+	Iterator& operator=(const Iterator<true>& rhs) {
+	  if (*this != rhs) {
+		this->iter_ = rhs.iter_;
+		this->last = rhs.last;
+		return *this;
+	  }
+	}
 
 	bool operator==(const Iterator<IsConst>& rhs) const { return this->iter_ == rhs.iter_; }
 	bool operator!=(const Iterator<IsConst>& rhs) const { return !(rhs == *this); }
@@ -88,11 +105,11 @@ class List {
 
   bool empty() { return this->size_ == 0; }
 
-  iterator begin() { return iterator(this->first_); }
-  iterator end() { return iterator(nullptr); }
+  iterator begin() { return iterator(this->first_, this->last_); }
+  iterator end() { return iterator(nullptr, this->last_); }
 
-  const_iterator cbegin() const { return const_iterator(this->first_); }
-  const_iterator cend() const { return const_iterator(nullptr); }
+  const_iterator cbegin() const { return const_iterator(this->first_, this->last_); }
+  const_iterator cend() const { return const_iterator(nullptr, this->last_); }
 
   void insert(const_iterator it, const T& element);
   void insert(const_iterator it, T&& element);
@@ -224,7 +241,7 @@ template<typename T>
 template<bool IsConst>
 typename List<T>::template Iterator<IsConst> List<T>::Iterator<IsConst>::operator--() {
   if (this->iter_ == nullptr)
-	this->iter_ = List<T>::last_;
+	this->iter_ = &(this->last);
   else
 	this->iter_ = this->iter_->previous;
   return *this;
@@ -278,9 +295,9 @@ void List<T>::erase(List::iterator it) {
 
 template<typename T>
 void List<T>::erase(List::iterator first, List::iterator last) {
-  const_iterator it = first.iter_;
+  const_iterator it = first;
   while (first != last) {
-	first++;
+	++first;
 	this->erase(it);
 	it = first;
   }
@@ -422,7 +439,7 @@ void List<T>::unique() {
   if (this->size_ > 0) {
 	Node* prev = this->first_;
 	Node* current_node = this->first_->next;
-	for (int i = 0; i < this->size_; ++i) {
+	for (size_t i = 0; i < this->size_; ++i) {
 	  if (current_node->value == prev->value) {
 		prev->next = current_node->next;
 		if (current_node->next != nullptr) {
