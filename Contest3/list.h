@@ -14,7 +14,7 @@ class List {
 
 	Node(const T& value) : value(value) {}
 	Node(const T& value, Node* previous) : value(value), previous(previous) {}
-	Node(const T& value, Node* previous, Node* next) : Node(value, previous), next(next) {}
+	Node(const T& value, Node* previous, Node* next) : value(value), previous(previous), next(next) {}
 
 	Node(T&& value) : value(std::move(value)) {}
 	Node(T&& value, Node* previous) : value(std::move(value)), previous(previous) {}
@@ -40,6 +40,7 @@ class List {
 
   template<bool IsConst = true>
   class Iterator : public std::iterator<std::bidirectional_iterator_tag, std::conditional_t<IsConst, const T, T>> {
+    friend List;
    private:
 	Node* iter_;
    public:
@@ -172,12 +173,12 @@ List<T>& List<T>::operator=(const List& rhs) {
 	this->clear();
 	if (rhs.first_ != nullptr) {
 	  size_ = rhs.size_;
-	  first_ = new Node(*(rhs.first_->value));
+	  first_ = new Node(rhs.first_->value);
 	  Node* current_node = first_;
 	  Node* current_node_rhs = rhs.first_;
 	  while (current_node_rhs != rhs.last_) {
 		current_node_rhs = current_node_rhs->next;
-		auto new_node = new Node(*(current_node_rhs->value));
+		auto new_node = new Node(current_node_rhs->value);
 		new_node->previous = current_node;
 		current_node->next = new_node;
 		current_node = new_node;
@@ -194,13 +195,13 @@ List<T>& List<T>::operator=(const List&& rhs) {
 	this->clear();
 	if (rhs.first_ != nullptr) {
 	  size_ = rhs.size_;
-	  first_ = new Node(std::move(*(rhs.first_->value)));
+	  first_ = new Node(std::move(rhs.first_->value));
 	  Node* current_node = first_;
 	  Node* current_node_rhs = rhs.first_;
 	  while (current_node_rhs != rhs.last_) {
 		current_node_rhs = current_node_rhs->next;
 		delete current_node_rhs->previous;
-		auto new_node = new Node(std::move(*(current_node_rhs->value)));
+		auto new_node = new Node(std::move(current_node_rhs->value));
 		new_node->previous = current_node;
 		current_node->next = new_node;
 		current_node = new_node;
@@ -378,7 +379,7 @@ void List<T>::pop_back() {
 template<typename T>
 template<typename... Args>
 void List<T>::emplace_back(Args&& ... args) {
-  Node* insertion = new Node(std::forward<Args>(args)..., this->last_);
+  Node* insertion = new Node(this->last_, std::forward<Args>(args)...);
   if (this->size_ > 0) {
 	this->last_->next = insertion;
   } else {
@@ -407,7 +408,7 @@ void List<T>::reverse() {
   Node* current_node = this->last_;
   while (current_node != nullptr) {
 	Node* prev = current_node->previous;
-	current_node->prev = current_node->next;
+	current_node->previous = current_node->next;
 	current_node->next = prev;
 	current_node = prev;
   }
