@@ -29,51 +29,43 @@ class List {
 	template<typename... Args>
 	Node(Node* previous, Node* next, Args&& ... args) : value(std::forward<Args>(args)...), previous(previous), next(next) {}
 
-	Node& operator=(Node& rhs) {
-	  this->value = rhs.value;
-	  this->previous = rhs.previous;
-	  this->next = rhs.next;
-	}
-	Node& operator=(Node&& rhs) {
-	  this->value = std::move(rhs.value);
-	  this->previous = rhs.previous;
-	  this->next = rhs.next;
-	}
-
 	bool operator==(const Node& rhs) const { return this->value == rhs.value; }
 	bool operator!=(const Node& rhs) const { return !(rhs == *this); }
+  };
+
+  struct list_end {
+	mutable Node* next = nullptr;
+	mutable Node* previous = nullptr;
 
   };
+
  private:
   size_t size_ = 0;
   Node* first_;
   Node* last_;
+  Node* fake;
 
   template<bool IsConst = true>
   class Iterator : public std::iterator<std::bidirectional_iterator_tag, std::conditional_t<IsConst, const T, T>> {
 	friend List;
    private:
 	Node* iter_;
-	Node& last;
    public:
 	Iterator() = default;
 	//Iterator(Node* pointer) : iter_(pointer), last() {}
-	Iterator(Node* pointer, Node* last) : iter_(pointer), last(*last) {}
-	Iterator(const Iterator<false>& it) : last(it.last) { *this = it;}
-	Iterator(const Iterator<true>& it) : last(it.last) { *this = it; }
+	Iterator(Node* pointer, Node* last) : iter_(pointer) {}
+	Iterator(const Iterator<false>& it) { *this = it; }
+	Iterator(const Iterator<true>& it) { *this = it; }
 
 	Iterator& operator=(const Iterator<!IsConst>& rhs) {
 	  if (*this != rhs) {
 		this->iter_ = rhs.iter_;
-		this->last = rhs.last;
-		return *this;
 	  }
 	}
 
 	Iterator& operator=(const Iterator& rhs) {
 	  if (*this != rhs) {
 		this->iter_ = rhs.iter_;
-		this->last = rhs.last;
 		return *this;
 	  }
 	}
@@ -97,7 +89,7 @@ class List {
   using const_iterator = Iterator<true>;
   using value_type = T;
 
-  List() = default;
+  List() : first_(nullptr), last_(nullptr), fake(reinterpret_cast<Node*>(new list_end)) {}
 
   List(size_t count, const T& value = T());
 
@@ -121,7 +113,7 @@ class List {
   iterator end() { return iterator(nullptr, this->last_); }
 
   const_iterator cbegin() const { return const_iterator(this->first_, this->last_); }
-  const_iterator cend() const { return const_iterator(nullptr, this->last_); }
+  const_iterator cend() const { return const_iterator(fake, this->last_); }
 
   void insert(const_iterator it, const T& element);
   void insert(const_iterator it, T&& element);
@@ -193,7 +185,7 @@ List<T>::List(size_t count, const T& value) : size_(count) {
 	current_node = new_node;
   }
   this->last_ = current_node;
-
+  this->fake = reinterpret_cast<Node*>(new list_end);
 }
 
 template<typename T>
@@ -252,10 +244,7 @@ typename List<T>::template Iterator<IsConst> List<T>::Iterator<IsConst>::operato
 template<typename T>
 template<bool IsConst>
 typename List<T>::template Iterator<IsConst> List<T>::Iterator<IsConst>::operator--() {
-  if (this->iter_ == nullptr)
-	this->iter_ = &(this->last);
-  else
-	this->iter_ = this->iter_->previous;
+  this->iter_ = this->iter_->previous;
   return *this;
 }
 
@@ -390,6 +379,7 @@ void List<T>::pop_front() {
 	  this->first_ = nullptr;
 	}
 	this->first_ = this->first_->next;
+	--(this->size_);
   }
 }
 
@@ -402,6 +392,7 @@ void List<T>::pop_back() {
 	  this->last_ = nullptr;
 	}
 	this->last_ = this->last_->previous;
+	--(this->size_);
   }
 }
 
